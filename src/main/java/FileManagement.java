@@ -51,6 +51,10 @@ public class FileManagement {
             logger.error("Error",ex);
             return -1;
         }
+        finally {
+
+            conn =null;
+        }
     }
     public void LoadFile(File p_file) throws IOException {
         String fileName = p_file.getName();
@@ -85,9 +89,6 @@ public class FileManagement {
         catch (SQLException ex) {
             logger.error("Error",ex);
         }
-        finally {
 
-            conn =null;
-        }
         }
     }
