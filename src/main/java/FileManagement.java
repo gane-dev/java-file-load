@@ -32,8 +32,8 @@ public class FileManagement {
         try
         {
 
-         Files.newDirectoryStream(Paths.get(filePath),
-                path -> path.toString().endsWith(".xlsx"))
+         Files.newDirectoryStream(Paths.get(filePath),"*.*")
+            //    path -> path.toString().endsWith(".xlsx")  )
                     .forEach(filePath -> {
                         try {
                             LoadFile(filePath.toFile());
@@ -73,15 +73,18 @@ public class FileManagement {
             if (result == 1) {
                 //empty - move to archive folder
                 Files.copy(p_file.toPath(), new File(archivePath + "/" + archiveFileName).toPath());
+                conn.commit();
             } else if (result == -1) {
                 //error - move to error folder
                 Files.copy(p_file.toPath(), new File(errorPath + "/" + archiveFileName).toPath());
+                conn.rollback();
             } else {
                 //success - move to archive
                 Files.copy(p_file.toPath(), new File(archivePath + "/" + archiveFileName).toPath());
+                conn.rollback();
             }
             Files.delete(p_file.toPath());
-            conn.commit();
+
         } catch (IOException ix) {
             logger.error("Error",ix);
 

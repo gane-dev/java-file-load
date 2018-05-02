@@ -92,6 +92,7 @@ public class InsertMasterTable {
         temp.put(15,40);
         temp.put(16, 50);
         temp.put(17, 30);
+        temp.put(20, 3);
         temp.put(21, 50);
         temp.put(23, 3);
         temp.put(25, 3);
@@ -111,19 +112,21 @@ public class InsertMasterTable {
         DataFormatter dataFormatter = new DataFormatter();
         int i=1;
        // String patt = "^\\d*\\.\\d+|\\d+\\.\\d*$";
-        String patt = "[^0-9.]";
-
+        String patt = "[^0-9.-]";
+        if (excelRow == null)
+            return  0;
         try {
             //for (Cell cell : excelRow) {
             for(int idx =0;idx < 31;idx++)
             {
+
                // Cell cell = excelRow.getCell(idx);
 
                 //String cellValue = dataFormatter.formatCellValue(excelRow.getCell(idx).getStringCellValue());
                 String cellValue =dataFormatter.formatCellValue(excelRow.getCell(idx)).trim();
                     if (idx != 10) {
                         if (!cellValue.isEmpty()) {
-                            if (idx == 17 || idx == 18 || idx == 19 || idx == 21 || idx == 23 || idx == 25) {
+                            if (idx == 17 || idx == 18 || idx == 21 || idx == 23 || idx == 25) {
                                 cellValue = cellValue.replaceAll(patt,"");
                                 if (cellValue.equals(""))
                                     insertStatement.setObject(i, null, Types.DECIMAL);
@@ -133,7 +136,7 @@ public class InsertMasterTable {
                             else
                                 insertStatement.setString(i, cellValue.substring(0, cellValue.length() > Integer.parseInt(fieldLength.get(idx + 1).toString()) ? Integer.parseInt(fieldLength.get(idx + 1).toString()) : cellValue.length()));
                         } else {
-                            if (idx == 17 || idx == 18 || idx == 19 || idx == 21 || idx == 23 || idx == 25)
+                            if (idx == 17 || idx == 18  || idx == 21 || idx == 23 || idx == 25)
                                 insertStatement.setObject(i, null, Types.DECIMAL);
                             else
                                 insertStatement.setObject(i, null, Types.NVARCHAR);
@@ -154,6 +157,9 @@ public class InsertMasterTable {
             logger.error("Error",ex);
             return -1;
         }
+        finally {
+            excelRow = null;
+        }
     }
     public int InsertBatch(Row excelRow, boolean execute)
     {
@@ -162,7 +168,8 @@ public class InsertMasterTable {
             if (execute)
             {
                 insertStatement.executeBatch();
-        //        conn.commit();
+                conn.commit();
+                insertStatement=conn.prepareStatement(insertSQL);
                 return 0;
             }
             if (this.insertStatement ==null ) {
