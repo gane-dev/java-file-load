@@ -74,8 +74,8 @@ public class CommonObjects {
                         "UNIT_OF_ISSUE," +
                         "UNIT_OF_MEASURE_DESC," +
                         "DIST_PROD_DESC," +
-                        "DIST_ALL_ITEM_ID," +
-                        "FILE_ID" +
+                        "DIST_ALT_ITEM_ID," +
+                        "FILE_ID," +
                         "STATUS, " +
                         "MASTER_FILE_ID" +
                         " ) "
@@ -95,7 +95,8 @@ public class CommonObjects {
                     "DIST_CUST_STATE," +
                     "DIST_CUST_ZIP_CD," +
                     "CUST_COUNTRY_CD," +
-                    "FILE_ID" +
+
+                    "FILE_ID," +
                     "STATUS, " +
                     "MASTER_FILE_ID" +
                     " ) "
@@ -121,7 +122,7 @@ public class CommonObjects {
                     "DIST_INVOICE_DT," +
                     "DIST_PO_ID," +
                     "DIST_PO_DT," +
-                    "FILE_ID" +
+                    "FILE_ID," +
                     "STATUS, " +
                     "MASTER_FILE_ID" +
                     " ) "
@@ -168,12 +169,12 @@ public class CommonObjects {
                         "SOURCE_ID," +
                         "ENTITY," +
                         "FILE_NAME," +
-                        "FILE_TYPE" +
-                        "FILE_REC_COUNT" +
-                        "LOAD_REC_COUNT" +
-                        "TAB_REC_COUNT" +
-                        "STATUS" +
-                        "TABLE_NAME" +
+                        "FILE_TYPE," +
+                        "FILE_REC_COUNT," +
+                        "LOAD_REC_COUNT," +
+                        "TAB_REC_COUNT," +
+                        "STATUS," +
+                        "TABLE_NAME," +
                         "FILE_ID" +
                         " ) "  + " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
                 break;
@@ -200,7 +201,7 @@ public class CommonObjects {
             }
             case DIST_USAGE_STG1:
             {
-                int[] temp = {6 , 7 , 8 , 10};
+                int[] temp = {6 ,  8 , 10};
                 return  temp;
             }
         }
@@ -275,7 +276,6 @@ public class CommonObjects {
                 temp.put(8, 25);
                 temp.put(9, 2);
                 temp.put(10, 10);
-
                 temp.put(11, 3);
 
                 break;

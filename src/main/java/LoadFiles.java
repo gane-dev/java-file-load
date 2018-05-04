@@ -8,7 +8,11 @@ import java.sql.SQLException;
 public class LoadFiles {
     final static Logger logger = Logger.getLogger(LoadFiles.class);
     static Connection conn;
-
+    static  String connectionString = "";
+    public  static Connection getConnection()
+    {
+       return JdbcOracleConnection.getConnection(connectionString);
+    }
     public static void main(String[] args)  {
         GetPropertyValues propertyObject = new GetPropertyValues();
         //log starting the load process
@@ -18,21 +22,24 @@ public class LoadFiles {
         String filePath="";
         String archivePath="";
         String errorPath="";
+        boolean excelType=true;
         //get database connection
         try{
-            String connString = "jdbc:oracle:thin:" +
+            connectionString
+            = "jdbc:oracle:thin:" +
                     propertyObject.getPropValues("db_user") + "/" +
                     propertyObject.getPropValues("db_pwd") + "@"
                     +propertyObject.getPropValues("conn_string");
-            conn = JdbcOracleConnection.getConnection(connString);
-            if (conn == null) {
-                System.out.println("Error=> " + "DB Connection Error");
-                logger.error(connString);
-                logger.error("DB Connection Error");
-                System.exit(0);
-            }
-            System.out.println("Info=> " + "DB Connection acquired");
-            logger.error("DB Connection acquired");
+           // conn = JdbcOracleConnection.getConnection(connectionString);
+            CommonObjects.setConnectionString(connectionString);
+//            if (conn == null) {
+//                System.out.println("Error=> " + "DB Connection Error");
+//                logger.error(connectionString);
+//                logger.error("DB Connection Error");
+//                System.exit(0);
+//            }
+//            System.out.println("Info=> " + "DB Connection acquired");
+//            logger.error("DB Connection acquired");
 
         }
         catch (Exception iox)
@@ -41,14 +48,26 @@ public class LoadFiles {
             logger.error("DB Connection Error");
             System.exit(0);
         }
+        if (args[0].equals("0")){
         filePath = propertyObject.getPropValues("file_path");
         archivePath = propertyObject.getPropValues("archive_path");
-        errorPath = propertyObject.getPropValues("error_path");
+        errorPath = propertyObject.getPropValues("error_path");}
+        else {
+            excelType =false;
+            filePath = propertyObject.getPropValues("text_file_path");
+            archivePath = propertyObject.getPropValues("text_archive_path");
+            errorPath = propertyObject.getPropValues("text_error_path");}
+
+
         if (filePath != "" && archivePath != "" && errorPath != "") {
+
             //call Load Excel files
+            CommonObjects.setFilePath(filePath);
+            CommonObjects.setArchivePath(archivePath);
+            CommonObjects.setErrorPath(errorPath);
             System.out.println("Log=> " + "Loading Files started");
             try {
-                manageFiles = new FileManagement(filePath, archivePath, errorPath, conn);
+                manageFiles = new FileManagement(filePath, archivePath, errorPath,excelType);
                 int result = manageFiles.ProcessFiles();
                 if (result == 0) {
                     System.out.println("Log=> " + "Loading Files completed");

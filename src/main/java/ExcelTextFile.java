@@ -69,9 +69,9 @@ public class ExcelTextFile {
 
         else {
 
-            //skip file - empty
-            logger.info("File empty :" + file.getName());
-            return 1;
+            System.out.println("Log=> " +"Completed :" + file.getName());
+            logger.info("Completed :" + file.getName());
+            return 0;
         }
 
         } catch (FileNotFoundException e) {
@@ -79,6 +79,10 @@ public class ExcelTextFile {
         }
         catch (Exception e) {
             logger.error("Error",e);
+        }
+        finally {
+            sc.close();
+            sc=null;
         }
         return 0;
     }

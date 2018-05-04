@@ -21,7 +21,7 @@ public  class InsertTableBase implements  InsertTable{
     String fileName;
     int[] decimalIndex;
     TableType tableType;
-
+    int skippedRow =0;
     String distId;
     public InsertTableBase( TableType p_table,String p_fileName) {
         conn = JdbcOracleConnection.getConnection(CommonObjects.getConnectionString());
@@ -65,7 +65,7 @@ public  class InsertTableBase implements  InsertTable{
     private int AddSrcTrack()
     {
         try {
-            insertStatement =  conn.prepareStatement(CommonObjects.TableQuery(TableType.LD_LOADER_LOG));
+            insertStatement =  conn.prepareStatement(CommonObjects.TableQuery(TableType.LD_SRC_FILE_TRACK));
             insertStatement.setString(1,"DISTU");
             insertStatement.setString(2,distId);
             String entity ="";
@@ -168,7 +168,7 @@ public  class InsertTableBase implements  InsertTable{
         }
 
          else {
-            return InsertControlTotal(totalRecords, 0.0,0.0);
+            return InsertControlTotal(totalRecords-skippedRow-1, 0.0,0.0);
 
             }
             } catch (Exception ex) {
@@ -237,38 +237,37 @@ public  class InsertTableBase implements  InsertTable{
                 insertStatement  =conn.prepareStatement(insertSQL);
             Scanner sc = new Scanner(rec);
             sc.useDelimiter("[|]");
-            while(sc.hasNext()){
+            while(sc.hasNext() && idx < fieldLength.size()){
 
             String cellValue = sc.next();
-
-                    if (ArrayUtils.contains( decimalIndex, idx ))
-                    {
-                        if (!cellValue.isEmpty()) {
-                            cellValue = cellValue.replaceAll(patt,"");
-                            if (cellValue.equals(""))
-                                insertStatement.setObject(i, null, Types.DECIMAL);
-                            else
-                                insertStatement.setDouble(i, Double.parseDouble(cellValue));
-                        }
-                        else
+            if ( idx ==0 && cellValue.replaceAll(firstCellPattern,"").length() < 5) {skippedRow++; return 0;}
+                if (ArrayUtils.contains(decimalIndex, idx)) {
+                    if (!cellValue.isEmpty()) {
+                        cellValue = cellValue.replaceAll(patt, "");
+                        if (cellValue.equals(""))
                             insertStatement.setObject(i, null, Types.DECIMAL);
-                    }
-                    else
-                    {
-                        if (!cellValue.isEmpty())
-                            insertStatement.setString(i, cellValue.substring(0, cellValue.length() > Integer.parseInt(fieldLength.get(idx + 1).toString()) ? Integer.parseInt(fieldLength.get(idx + 1).toString()) : cellValue.length()));
                         else
-                            insertStatement.setObject(i, null, Types.NVARCHAR);
-                    }
-
-                idx =idx+1;
-                    i = i + 1;
+                            insertStatement.setDouble(i, Double.parseDouble(cellValue));
+                    } else
+                        insertStatement.setObject(i, null, Types.DECIMAL);
+                } else {
+                    if (!cellValue.isEmpty())
+                        insertStatement.setString(i, cellValue.substring(0, cellValue.length() > Integer.parseInt(fieldLength.get(idx + 1).toString()) ? Integer.parseInt(fieldLength.get(idx + 1).toString()) : cellValue.length()));
+                    else
+                        insertStatement.setObject(i, null, Types.NVARCHAR);
                 }
-            insertStatement.setString(i, "N");
-            i=i+1;
-            insertStatement.setString(i, "M"+ fileId);
-            insertStatement.addBatch();
-            return  0;
+
+                idx = idx + 1;
+                i = i + 1;
+            }
+                insertStatement.setInt(i, fileId);
+                i = i + 1;
+                insertStatement.setString(i, "N");
+                i = i + 1;
+                insertStatement.setString(i, "M" + fileId);
+                insertStatement.addBatch();
+                return 0;
+
         }
         catch (NumberFormatException numEx){
             logger.error("Error",numEx);

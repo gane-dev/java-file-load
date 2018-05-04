@@ -19,16 +19,20 @@ public class FileManagement {
     String filePath="";
     String archivePath="";
     String errorPath="";
-    static Connection conn;
-    public  FileManagement(String p_filePath, String p_archivePath, String p_errorPath,Connection p_connection)
+  //  static Connection conn;
+    int fileCount=0;
+    boolean excelFileType=true;
+    public  FileManagement(String p_filePath, String p_archivePath, String p_errorPath,boolean arg)
     {
         filePath=p_filePath;
         archivePath=p_archivePath;
         errorPath=p_errorPath;
-        conn = p_connection;
+
+        excelFileType=arg;
     }
     public int ProcessFiles()
     {
+
         try
         {
 
@@ -45,7 +49,6 @@ public class FileManagement {
                     });
             return  0;
         }
-
         catch (IOException ex)
         {
             logger.error("Error",ex);
@@ -53,43 +56,74 @@ public class FileManagement {
         }
         finally {
 
-            conn =null;
+            //conn =null;
         }
     }
+
+    private int ArchiveFile(Path filePath,String fileName,boolean error)
+    {
+        Date date = new Date();
+
+        String archiveFileName;
+        try{
+            if (excelFileType)
+                archiveFileName= fileName.substring(0,fileName.lastIndexOf("."))+ sdf.format(date) +".xlsx";
+            else
+                archiveFileName= fileName.substring(0,fileName.lastIndexOf("."))+ sdf.format(date) +".txt";
+        if (error)
+            //error - move to error folder
+            Files.copy(filePath, new File(errorPath + "/" + archiveFileName).toPath());
+        else
+            //empty - move to archive folder
+            Files.copy(filePath, new File(archivePath + "/" + archiveFileName).toPath());
+
+
+        Files.delete(filePath);
+            return  -0;
+
+    } catch (IOException ix) {
+        logger.error("Error",ix);
+        return  -1;
+    }
+        catch (Exception ix) {
+            logger.error("Error",ix);
+            return  -1;
+        }
+    }
+
+
     public void LoadFile(File p_file) throws IOException {
+
         String fileName = p_file.getName();
-        int fileId = ReadDB.getFileId(conn);
-        String distId = ReadDB.getSupplierId(fileName.substring(0,fileName.indexOf("_")),conn);
+
         logger.info(fileName);
-        logger.info(fileId);
-        logger.info(distId);
-        ExcelFile exFile = new ExcelFile(conn,p_file,fileId,fileName,distId,archivePath);
+
+        int archiveResult=-1;
+        ExcelTextFile exFile =new ExcelTextFile(p_file,excelFileType);
+
         try {
-
-            int result = exFile.LoadFile();
             Date date = new Date();
+            int result;
+           result= exFile.LoadFile();
 
-            String archiveFileName = fileName.substring(0,fileName.lastIndexOf("."))+ sdf.format(date) +".xlsx";
-            if (result == 1) {
-                //empty - move to archive folder
-                Files.copy(p_file.toPath(), new File(archivePath + "/" + archiveFileName).toPath());
-                conn.commit();
-            } else if (result == -1) {
+
+            if (result == -1) {
                 //error - move to error folder
-                Files.copy(p_file.toPath(), new File(errorPath + "/" + archiveFileName).toPath());
-                conn.rollback();
+                archiveResult=  ArchiveFile(p_file.toPath(),fileName,true );
+               if (archiveResult ==-1)
+                   logger.error("Failed archive:"+p_file.toPath());
+                //conn.rollback();
             } else {
                 //success - move to archive
-                Files.copy(p_file.toPath(), new File(archivePath + "/" + archiveFileName).toPath());
-                conn.rollback();
+                archiveResult=  ArchiveFile(p_file.toPath(),fileName,false );
+                if (archiveResult ==-1)
+                    logger.error("Failed archive:"+p_file.toPath());
+              //  conn.commit();
             }
-            Files.delete(p_file.toPath());
 
-        } catch (IOException ix) {
-            logger.error("Error",ix);
 
         }
-        catch (SQLException ex) {
+        catch (Exception ex) {
             logger.error("Error",ex);
         }
 
