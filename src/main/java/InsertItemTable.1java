@@ -1,0 +1,51 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class InsertItemTable {
+    private String insertSQL = "INSERT INTO DIST_ITEM_STG1 " +
+            "( BEGIN_USAGE_DATE," +
+            "END_USAGE_DATE," +
+            "DIST_ID," +
+
+            "DIST_PROD_NUM," +
+            "MFR_NAME," +
+            "MFR_PROD_NUM," +
+            "BRAND_NAME," +
+            "DIST_GTIN_UPC," +
+            "CASE_PACK_LITERAL," +
+            "CASE_PACK_QTY," +
+            "UNIT_OF_ISSUE," +
+            "UNIT_OF_MEASURE_DESC," +
+            "DIST_PROD_DESC," +
+            "DIST_ALL_ITEM_ID," +
+            "FILE_ID" +
+            "STATUS, " +
+            "MASTER_FILE_ID" +
+            " ) "
+            + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+}
+    private Map CreateMap()
+
+    {
+        Map temp = new HashMap<Integer,Integer>();
+        temp.put(1, 20);
+        temp.put(2, 20);
+        temp.put(3, 7);
+        temp.put(4, 40);
+        temp.put(5, 50);
+        temp.put(6, 40);
+        temp.put(7, 50);
+        temp.put(8, 25);
+        temp.put(9, 30);
+
+
+        temp.put(12, 3);
+        temp.put(13, 50);
+        temp.put(14, 15);
+
+
+
+
+
+        return  temp;
+    }

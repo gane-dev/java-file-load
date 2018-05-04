@@ -1,0 +1,3 @@
+public enum FileType {
+      EXCEL, TEXT_PIPE_USAGE,TEXT_PIPE_CUSTOMER,TEXT_PIPE_ITEM
+}

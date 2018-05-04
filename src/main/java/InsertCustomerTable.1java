@@ -1,0 +1,46 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class InsertCustomerTable {
+     "INSERT INTO DIST_CUST_STG1 " +
+             "( BEGIN_USAGE_DATE," +
+             "END_USAGE_DATE," +
+             "DIST_ID," +
+             "DIST_CUST_NUM," +
+             "DIST_CUST_NAME," +
+             "DIST_CUST_ADDRESS," +
+             "DIST_CUST_ADDRESS2," +
+             "DIST_CUST_CITY," +
+             "DIST_CUST_STATE," +
+             "DIST_CUST_ZIP_CD," +
+             "CUST_COUNTRY_CD," +
+             "FILE_ID" +
+             "STATUS, " +
+             "MASTER_FILE_ID" +
+             " ) "
+             + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+}
+    private Map CreateMap()
+
+    {
+        Map temp = new HashMap<Integer,Integer>();
+        temp.put(1, 20);
+        temp.put(2, 20);
+        temp.put(3, 7);
+        temp.put(4, 40);
+        temp.put(5, 50);
+        temp.put(6, 50);
+        temp.put(7, 50);
+        temp.put(8, 25);
+        temp.put(9, 2);
+        temp.put(10, 10);
+
+        temp.put(11, 3);
+
+
+
+
+
+
+        return  temp;
+    }

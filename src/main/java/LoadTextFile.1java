@@ -1,0 +1,171 @@
+
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.util.Scanner;
+public class LoadTextFile {
+    final static Logger logger = Logger.getLogger(ExcelFile.class);
+    private File file;
+    private int fileId = -1;
+    private Connection conn = null;
+    private String fileName = "";
+    private String distId = "";
+    private String archivePath = "";
+    private int fileType=-1;
+    public LoadTextFile(Connection p_conn, File p_file, int p_fileId, String p_fileName, String p_distId, String p_archivePath) {
+        conn = p_conn;
+        file = p_file;
+        fileId = p_fileId;
+        fileName = p_fileName;
+        distId = p_distId;
+        archivePath = p_archivePath;
+    }
+    public int LoadFile() {
+
+        int rowIndex = 1;
+        int cacheSize = 1;
+        logger.info("Open Text");
+
+        int masterResult = -2;
+        Scanner sc = null;
+        InsertUsageTable insertUsageRecords = null;
+        InsertCustomerTable insertCustRecords = null;
+        InsertItemTable insertItemRecords = null;
+        if (file.getName().indexOf("_i") > 0) {
+            fileType = 1;
+            insertUsageRecords = new InsertUsageTable(conn, fileId);
+        } else if (file.getName().indexOf("_i") > 0) {
+            fileType = 2;
+            insertCustRecords = new InsertCustomerTable(conn, fileId);
+        } else if (file.getName().indexOf("_i") > 0) {
+            fileType = 3;
+            insertItemRecords = new InsertItemTable(conn, fileId);
+        }
+        try {
+            sc = new Scanner(file);
+            // Check if there is another line of input
+            while (sc.hasNextLine()) {
+
+
+                String str = sc.nextLine();
+                switch (fileType) {
+                    case 1: {
+                        insertUsageRecords.InsertBatch(str, false);
+                        if (cacheSize > 100) {
+                            masterResult = insertUsageRecords.InsertBatch(null, true);
+
+                            cacheSize = 1;
+                            if (masterResult == -1)
+                                return -1;
+                        }
+                        break;
+                        ;
+                    }
+                    case 2: {
+                        insertCustRecords.InsertBatch(str, false);
+                        if (cacheSize > 100) {
+                            masterResult = insertCustRecords.InsertBatch(null, true);
+
+                            cacheSize = 1;
+                            if (masterResult == -1)
+                                return -1;
+                        }
+                        break;
+                        ;
+                    }
+                    case 3: {
+                        insertItemRecords.InsertBatch(str, false);
+                        if (cacheSize > 100) {
+                            masterResult = insertItemRecords.InsertBatch(null, true);
+
+                            cacheSize = 1;
+                            if (masterResult == -1)
+                                return -1;
+                        }
+                        break;
+
+                    }
+
+                }
+
+                rowIndex++;
+                cacheSize++;
+            }
+            masterResult = InsertRecords.InsertBatch(null, true);
+            if (masterResult == 0) {
+                //after completing
+                //insert into ld log table
+                InsertLogTable logTable = new InsertLogTable();
+                int logResult = logTable.InsertRecord(fileName, conn, sheet.getPhysicalNumberOfRows(), distId, fileId, archivePath);
+                if (logResult == 0) {
+                    conn.commit();
+                    //insert into dist control table
+                    rec = sheet.getRow(lastRowNum);
+                    String patt = "[^0-9.-]";
+
+                    if (dataFormatter.formatCellValue(rec.getCell(0)).contains("ZZZ")) {
+                        Double totalCount = processControlTotals(rec.getCell(1));
+                        Double usageCount = processControlTotals(rec.getCell(2));
+                        Double spendCount = processControlTotals(rec.getCell(3));
+                        if (totalCount != -1.0 && usageCount != -1.0 && spendCount !=-1.0) {
+                            InsertControlTable insertCntrl = new InsertControlTable();
+                            int result = insertCntrl.InsertRecord(conn, fileId, totalCount, usageCount, spendCount);
+                            if (result == 0) {
+                                System.out.println("Log=> " + "File load completed:" + fileName);
+                                logger.info("File load completed:" + fileName);
+                                conn.commit();
+                            } else {
+                                System.out.println("Log=> " + "File load failed:" + fileName);
+                                logger.error("File load failed:" + fileName);
+                                conn.rollback();
+                            }
+                        }
+                        else
+                            return  -1;
+                    }
+                } else
+
+                {
+                    conn.rollback();
+                    System.out.println("Log=> " + "Error updating loader log table:" + fileName);
+                    logger.error("Error updating loader log table:" + fileName);
+                    return -1;
+                }
+
+            } else {
+
+                //skip file - empty
+                logger.info("File empty :" + fileName);
+                return 1;
+            }
+        return 0;
+        } catch (IOException exp) {
+            // TODO Auto-generated catch block
+            logger.error("Error", exp);
+            return -1;
+        } finally {
+            sc.close();
+        }
+    }
+    private static void parseLine(String str){
+        String book, author, price;
+        Scanner sc = new Scanner(str);
+        sc.useDelimiter("[|]");
+
+        // Check if there is another line of input
+        while(sc.hasNext()){
+
+            //<5 characters, skip the line
+            book = sc.next();
+            author = sc.next();
+            price = sc.next();
+            System.out.println("Book - " + book + " Author - " + author +
+                    " Price - " + price);
+        }
+        sc.close();
+    }
+}
+}
+}
