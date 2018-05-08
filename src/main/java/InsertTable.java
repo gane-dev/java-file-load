@@ -7,7 +7,7 @@ public interface InsertTable {
     final static Logger logger = Logger.getLogger(InsertTable.class);
     final String patt = "[^0-9.-]";
     final  String firstCellPattern = "[^0-9n]";
-    int InsertRecord(boolean finalCommit,Row excelRow,Double totalRecords);
+    int InsertRecord(boolean finalCommit,Row excelRow,String rec,Double totalRecords);
     int AddRow(Row excelRow,String rec);
     final static  int commitCount=1000;
 

@@ -23,6 +23,8 @@ public  class InsertTableBase implements  InsertTable{
     TableType tableType;
     int skippedRow =0;
     String distId;
+    int totalRecords=0;
+
     public InsertTableBase( TableType p_table,String p_fileName) {
         conn = JdbcOracleConnection.getConnection(CommonObjects.getConnectionString());
 
@@ -36,14 +38,14 @@ public  class InsertTableBase implements  InsertTable{
         fileId = ReadDB.getFileId(conn);
          distId= ReadDB.getSupplierId(fileName.substring(0,fileName.indexOf("_")),conn);
     }
-    public int InsertRecord(boolean finalCommit,Row excelRow,Double totalRecords){
+    public int InsertRecord(boolean finalCommit,Row excelRow,String rec,Double totalRecords){
         try {
 
 
                     insertStatement.executeBatch();
                     if (finalCommit) {
                         AddLoaderLog(totalRecords);
-                        AddControlLog(excelRow,totalRecords);
+                        AddControlLog(excelRow,rec);
                         if (tableType != TableType.DIST_MASTER_STG1)
                             AddSrcTrack();
                         conn.commit();
@@ -126,56 +128,75 @@ public  class InsertTableBase implements  InsertTable{
 
         rowCount++;
         if (rowCount > commitCount ){
-            result = InsertRecord(false,null,-1.0);
+            result = InsertRecord(false,null,null,-1.0);
             rowCount=1;
         }
         return result;//-2  for db commit error //-1 for add row error
 
     }
-    private Double processControlTotals(Cell cell)
+    private Double processControlTotals(Cell cell,String textCell)
     {
         DataFormatter dataFormatter = new DataFormatter();
-        String patt = "[^0-9.-]";
+       // String patt = "[^0-9.-]";
         String cellValue;
-        Double result = -1.0 ;
+        Double result = 0.0 ;
         if (cell !=null)
-        {
             cellValue = dataFormatter.formatCellValue(cell);
-            if (cellValue != "") {
-                cellValue = cellValue.trim().replaceAll(patt,"");
-                if (cellValue != "")
-                    result = Double.parseDouble(cellValue);
-            }
+        else
+            cellValue = textCell;
+        if (cellValue != "") {
+            cellValue = cellValue.trim().replaceAll(patt,"");
+            if (cellValue != "")
+                result = Double.parseDouble(cellValue);
         }
+
         return  result;
     }
-    private int AddControlLog(Row excelRow,Double totalRecords) {
+    private int AddControlLog(Row excelRow,String rec) {
+        Double usageCount =0.0;
+        Double spendCount=0.0;
+        Double totalCount=0.0;
+        String cellValue;
         try {
         DataFormatter dataFormatter = new DataFormatter();
         if (excelRow != null) {
 
             if (dataFormatter.formatCellValue(excelRow.getCell(0)).contains("ZZZ")) {
-                Double totalCount = processControlTotals(excelRow.getCell(1));
-                Double usageCount = processControlTotals(excelRow.getCell(2));
-                Double spendCount = processControlTotals(excelRow.getCell(3));
-                if (totalCount != -1.0 && usageCount != -1.0 && spendCount != -1.0) {
+                 totalCount = processControlTotals(excelRow.getCell(1),null);
+                 usageCount = processControlTotals(excelRow.getCell(2),null);
+                 spendCount = processControlTotals(excelRow.getCell(3),null);
 
-                    return InsertControlTotal(totalCount, usageCount, spendCount);
-                }
 
             }
 
         }
 
-         else {
-            return InsertControlTotal(totalRecords-skippedRow-1, 0.0,0.0);
+         else if (rec != null) {
+            Scanner sc = new Scanner(rec);
+            sc.useDelimiter("[|]");
+            if (sc.hasNext()) {
+                cellValue=sc.next();
+                if (!cellValue.isEmpty() ) {
+
+                    if (cellValue.equals("ZZZZZ")) {
+                        if (sc.hasNext()) {
+                            totalCount = processControlTotals(null, sc.next());
+                            if (sc.hasNext()) {
+                                usageCount = processControlTotals(null, sc.next());
+                                if (sc.hasNext())
+                                    spendCount = processControlTotals(null, sc.next());
+                            }
+                        }
+                    }
+                }
+            }
 
             }
+            return InsertControlTotal(totalCount, usageCount, spendCount);
             } catch (Exception ex) {
                 logger.error("Error", ex);
                 return -1;
             }
-        return 0;
 
     }
     private int InsertControlTotal(Double p_totalRecords, Double usageCount,Double spendCount)
@@ -241,6 +262,7 @@ public  class InsertTableBase implements  InsertTable{
 
             String cellValue = sc.next();
             if ( idx ==0 && cellValue.replaceAll(firstCellPattern,"").length() < 5) {skippedRow++; return 0;}
+
                 if (ArrayUtils.contains(decimalIndex, idx)) {
                     if (!cellValue.isEmpty()) {
                         cellValue = cellValue.replaceAll(patt, "");

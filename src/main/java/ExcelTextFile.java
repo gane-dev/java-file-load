@@ -42,6 +42,7 @@ public class ExcelTextFile {
         int masterResult = -2;
         Scanner sc = null;
         InsertTableBase textInsert =null;
+        String str=null;
         if (file.getName().toUpperCase().indexOf("_U") > 0) {
 
             textInsert = new InsertTableBase(TableType.DIST_USAGE_STG1,file.getName());
@@ -55,11 +56,11 @@ public class ExcelTextFile {
             sc = new Scanner(file);
             // Check if there is another line of input
             while (sc.hasNextLine()) {
-               String str = sc.nextLine();
+              str = sc.nextLine();
                textInsert.AddRow(null,str);
                 rowIndex++;
             }
-            masterResult = textInsert.InsertRecord(true,null, rowIndex+0.0);
+            masterResult = textInsert.InsertRecord(true,null, str,rowIndex+0.0);
             if (masterResult != 0)
             {
                 System.out.println("Log=> " + "Error updating loader log table:" + file.getName());
@@ -124,7 +125,7 @@ public class ExcelTextFile {
                 }
                 //final batch commit
                 rec = sheet.getRow(lastRowNum);
-                masterResult = addRecords.InsertRecord(true,rec, rowIndex+0.0);
+                masterResult = addRecords.InsertRecord(true,rec,null, rowIndex+0.0);
                 if (masterResult != 0)
                 {
                         System.out.println("Log=> " + "Error updating loader log table:" + file.getName());
