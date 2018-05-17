@@ -1,5 +1,8 @@
+
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -7,33 +10,146 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.Scanner;
 //import java.text.DecimalFormat;
+import org.apache.poi.xssf.eventusermodel.XSSFReader;
+import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.omg.PortableInterceptor.LOCATION_FORWARD;
-
+import org.xml.sax.*;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 public class ExcelTextFile {
     final static Logger logger = Logger.getLogger(ExcelTextFile.class);
     private File file;
-    boolean excel=true;
+    FileType fileType;
 
-    public ExcelTextFile(File p_file,boolean p_excel) {
+    public ExcelTextFile(File p_file,FileType p_fileType) {
 
         file = p_file;
-        excel =p_excel;
+        fileType =p_fileType;
     }
 
     public int LoadFile() {
 
 
-        if (excel)
+        if (fileType == FileType.EXCEL)
             return processExcelFile();
+        else if(fileType == FileType.EXCEL_OPTION)
+            return processExcelAsXml();
         else
             return processTextFile();
     }
+    private int processExcelAsXml()
+    {
+        try {
+            OPCPackage pkg = OPCPackage.open(file);
+            XSSFReader r = new XSSFReader(pkg);
+            SharedStringsTable sst = r.getSharedStringsTable();
+
+            XMLReader parser = fetchSheetParser(sst);
+
+
+            // To look up the Sheet Name / Sheet Order / rID,
+            //  you need to process the core Workbook stream.
+            // Normally it's of the form rId# or rSheet# InputStream sheet2 = r.getSheet("rId2");
+           // InputSource sheetSource = new InputSource(sheet2);
+            Iterator<InputStream> sheets = r.getSheetsData();
+            while(sheets.hasNext()) {
+                InputStream sheet = sheets.next();
+                InputSource sheetSource = new InputSource(sheet);
+                parser.parse(sheetSource);
+                sheet.close();
+                break;
+            }
+            return 0;
+        }
+        catch (SAXException sax)
+        {
+            logger.error("Error",sax);
+            return  -1;
+        }
+        catch (OpenXML4JException opx)
+        {
+            logger.error("Error",opx);
+            return  -1;
+        }
+        catch (IOException iox)
+        {
+            logger.error("Error",iox);
+            return  -1;
+        }
+        finally {
+
+        }
+    }
+    private XMLReader fetchSheetParser(SharedStringsTable sst)  throws SAXException {
+        XMLReader parser =
+                XMLReaderFactory.createXMLReader(
+                        "org.apache.xerces.parsers.SAXParser"
+                );
+        ContentHandler handler = new SheetHandler(sst);
+        parser.setContentHandler(handler);
+        return parser;
+    }
+    private static class SheetHandler extends DefaultHandler {
+        private SharedStringsTable sst;
+        private String lastContents;
+        private boolean nextIsString;
+
+        private SheetHandler(SharedStringsTable sst) {
+            this.sst = sst;
+        }
+
+        public void startElement(String uri, String localName, String name,
+                                 Attributes attributes) throws SAXException {
+            // c => cell
+            if(name.equals("c")) {
+                // Print the cell reference
+                System.out.print(attributes.getValue("r") + " - ");
+                //r - rownum
+                // Figure out if the value is an index in the SST
+                String cellType = attributes.getValue("t");
+                if(cellType != null && cellType.equals("s")) {
+                    nextIsString = true;
+                } else {
+                    nextIsString = false;
+                }
+            }
+            // Clear contents cache
+            lastContents = "";
+        }
+
+        public void endElement(String uri, String localName, String name)
+                throws SAXException {
+            // Process the last contents as required.
+            // Do now, as characters() may be called more than once
+            if(nextIsString) {
+                int idx = Integer.parseInt(lastContents);
+                lastContents = new XSSFRichTextString(sst.getEntryAt(idx)).toString();
+                nextIsString = false;
+                //idx -- cell number-1
+            }
+
+            // v => contents of a cell
+            // Output after we've seen the string contents
+            if(name.equals("v")) {
+                System.out.println(lastContents);
+            }
+        }
+
+        public void characters(char[] ch, int start, int length)
+                throws SAXException {
+            lastContents += new String(ch, start, length);
+        }
+    }
+
     private int processTextFile() {
         int rowIndex = 1;
         int cacheSize = 1;
@@ -45,12 +161,12 @@ public class ExcelTextFile {
         String str=null;
         if (file.getName().toUpperCase().indexOf("_U") > 0) {
 
-            textInsert = new InsertTableBase(TableType.DIST_USAGE_STG1,file.getName());
+            textInsert = new InsertTableBase(TableType.DIST_USAGE_STG1,file.getName(),fileType);
         } else if (file.getName().toUpperCase().indexOf("_C") > 0) {
 
-            textInsert = new InsertTableBase(TableType.DIST_CUST_STG1,file.getName());
+            textInsert = new InsertTableBase(TableType.DIST_CUST_STG1,file.getName(),fileType);
         } else if (file.getName().toUpperCase().indexOf("_I") > 0) {
-            textInsert = new InsertTableBase(TableType.DIST_ITEM_STG1,file.getName());
+            textInsert = new InsertTableBase(TableType.DIST_ITEM_STG1,file.getName(),fileType);
         }
         try {
             sc = new Scanner(file);
@@ -110,7 +226,7 @@ public class ExcelTextFile {
                 lastRowNum = sheet.getLastRowNum();
                 Row header = sheet.getRow(0);
                 int n = header.getLastCellNum();
-                addRecords = new InsertTableBase(TableType.DIST_MASTER_STG1,file.getName());
+                addRecords = new InsertTableBase(TableType.DIST_MASTER_STG1,file.getName(),fileType);
 //
                 while (rowIndex < lastRowNum) {
                    rec= sheet.getRow(rowIndex);
@@ -170,3 +286,11 @@ public class ExcelTextFile {
     }
 }
 
+/*
+Convert serial number to date
+public static DateTime FromExcelSerialDate(int SerialDate)
+{
+    if (SerialDate > 59) SerialDate -= 1; //Excel/Lotus 2/29/1900 bug
+    return new DateTime(1899, 12, 31).AddDays(SerialDate);
+}
+ */

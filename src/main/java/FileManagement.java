@@ -21,14 +21,14 @@ public class FileManagement {
     String errorPath="";
   //  static Connection conn;
     int fileCount=0;
-    boolean excelFileType=true;
-    public  FileManagement(String p_filePath, String p_archivePath, String p_errorPath,boolean arg)
+    FileType fileType;
+    public  FileManagement(String p_filePath, String p_archivePath, String p_errorPath,FileType p_fileType)
     {
         filePath=p_filePath;
         archivePath=p_archivePath;
         errorPath=p_errorPath;
 
-        excelFileType=arg;
+        fileType =p_fileType;
     }
     public int ProcessFiles()
     {
@@ -66,8 +66,8 @@ public class FileManagement {
 
         String archiveFileName;
         try{
-            if (excelFileType)
-                archiveFileName= fileName.substring(0,fileName.lastIndexOf("."))+ sdf.format(date) +".xlsx";
+            if (fileType == FileType.EXCEL || fileType == FileType.EXCEL_OPTION)
+                archiveFileName = fileName.substring(0, fileName.lastIndexOf(".")) + sdf.format(date) + ".xlsx";
             else
                 archiveFileName= fileName.substring(0,fileName.lastIndexOf("."))+ sdf.format(date) +".txt";
         if (error)
@@ -99,7 +99,7 @@ public class FileManagement {
         logger.info(fileName);
 
         int archiveResult=-1;
-        ExcelTextFile exFile =new ExcelTextFile(p_file,excelFileType);
+        ExcelTextFile exFile =new ExcelTextFile(p_file,fileType);
 
         try {
             Date date = new Date();

@@ -22,7 +22,8 @@ public class LoadFiles {
         String filePath="";
         String archivePath="";
         String errorPath="";
-        boolean excelType=true;
+        FileType fileType;
+        //boolean excelType=true;
         //get database connection
         try{
             connectionString
@@ -48,17 +49,46 @@ public class LoadFiles {
             logger.error("DB Connection Error");
             System.exit(0);
         }
-        if (args[0].equals("0")){
-        filePath = propertyObject.getPropValues("file_path");
-        archivePath = propertyObject.getPropValues("archive_path");
-        errorPath = propertyObject.getPropValues("error_path");}
-        else {
-            excelType =false;
-            filePath = propertyObject.getPropValues("text_file_path");
-            archivePath = propertyObject.getPropValues("text_archive_path");
-            errorPath = propertyObject.getPropValues("text_error_path");}
+        switch (args[0]){
+            case "0": {
+             fileType = FileType.EXCEL;
+             break;
+            }
+            case "1": {
+                fileType = FileType.EXCEL_OPTION;
+                break;
+            }
+            case "2": {
+                fileType = FileType.TEXT_PIPE_USAGE;
+                break;
+            }
+            case "3": {
+                fileType = FileType.TEXT_BANG_USAGE;
+                break;
+            }
+            case "4": {
+                fileType = FileType.TEXT_SYS_USAGE;
+                break;
+            }
+            case "5": {
+                fileType = FileType.TEXT_TAB_USAGE;
+                break;
+            }
+            case "6": {
+                fileType = FileType.TEXT_CAT_USAGE;
+                break;
+            }
+            case "7": {
+                fileType = FileType.TEXT_OPTION_USAGE;
+                break;
+            }
+            default:
+                fileType=FileType.EXCEL;
+        }
 
-
+        filePath = propertyObject.getPropValues(fileType.name().toLowerCase()+"_file_path");
+        archivePath = propertyObject.getPropValues(fileType.name().toLowerCase()+"_archive_path");
+        errorPath = propertyObject.getPropValues(fileType.name().toLowerCase()+"_error_path");
         if (filePath != "" && archivePath != "" && errorPath != "") {
 
             //call Load Excel files
@@ -67,7 +97,7 @@ public class LoadFiles {
             CommonObjects.setErrorPath(errorPath);
             System.out.println("Log=> " + "Loading Files started");
             try {
-                manageFiles = new FileManagement(filePath, archivePath, errorPath,excelType);
+                manageFiles = new FileManagement(filePath, archivePath, errorPath,fileType);
                 int result = manageFiles.ProcessFiles();
                 if (result == 0) {
                     System.out.println("Log=> " + "Loading Files completed");

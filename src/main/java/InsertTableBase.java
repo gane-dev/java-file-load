@@ -24,15 +24,16 @@ public  class InsertTableBase implements  InsertTable{
     int skippedRow =0;
     String distId;
     int totalRecords=0;
+    FileType fileType;
 
-    public InsertTableBase( TableType p_table,String p_fileName) {
+    public InsertTableBase( TableType p_table,String p_fileName,FileType p_fileType) {
         conn = JdbcOracleConnection.getConnection(CommonObjects.getConnectionString());
 
         tableType=p_table;
-
-        fieldLength = CommonObjects.ReturnMap(p_table) ;
-        decimalIndex=CommonObjects.DecimalIndex(p_table);
-        insertSQL = CommonObjects.TableQuery(p_table);
+        fileType = p_fileType;
+        fieldLength = CommonObjects.ReturnMap(p_table,fileType) ;
+        decimalIndex=CommonObjects.DecimalIndex(p_table,fileType);
+        insertSQL = CommonObjects.TableQuery(p_table,fileType);
         fileName = p_fileName;
 
         fileId = ReadDB.getFileId(conn);
@@ -67,7 +68,7 @@ public  class InsertTableBase implements  InsertTable{
     private int AddSrcTrack()
     {
         try {
-            insertStatement =  conn.prepareStatement(CommonObjects.TableQuery(TableType.LD_SRC_FILE_TRACK));
+            insertStatement =  conn.prepareStatement(CommonObjects.TableQuery(TableType.LD_SRC_FILE_TRACK,fileType));
             insertStatement.setString(1,"DISTU");
             insertStatement.setString(2,distId);
             String entity ="";
@@ -202,7 +203,7 @@ public  class InsertTableBase implements  InsertTable{
     private int InsertControlTotal(Double p_totalRecords, Double usageCount,Double spendCount)
     {
         try {
-            insertStatement = conn.prepareStatement(CommonObjects.TableQuery(TableType.DIST_CONTROL_TOTALS));
+            insertStatement = conn.prepareStatement(CommonObjects.TableQuery(TableType.DIST_CONTROL_TOTALS,fileType));
             insertStatement.setInt(1, fileId);
             insertStatement.setDouble(2, p_totalRecords);
             insertStatement.setDouble(3, usageCount);
@@ -220,7 +221,7 @@ public  class InsertTableBase implements  InsertTable{
     private int  AddLoaderLog(Double totalRecords)
     {
         try {
-            insertStatement =  conn.prepareStatement(CommonObjects.TableQuery(TableType.LD_LOADER_LOG));
+            insertStatement =  conn.prepareStatement(CommonObjects.TableQuery(TableType.LD_LOADER_LOG,fileType));
         insertStatement.setString(1,fileName);
         insertStatement.setInt(2,0);
         insertStatement.setInt(3,totalRecords.intValue());
@@ -272,11 +273,22 @@ public  class InsertTableBase implements  InsertTable{
                             insertStatement.setDouble(i, Double.parseDouble(cellValue));
                     } else
                         insertStatement.setObject(i, null, Types.DECIMAL);
+
                 } else {
                     if (!cellValue.isEmpty())
                         insertStatement.setString(i, cellValue.substring(0, cellValue.length() > Integer.parseInt(fieldLength.get(idx + 1).toString()) ? Integer.parseInt(fieldLength.get(idx + 1).toString()) : cellValue.length()));
                     else
                         insertStatement.setObject(i, null, Types.NVARCHAR);
+                    if (tableType == TableType.DIST_USAGE_STG1 && idx == 9)
+                    {
+                        i = i + 1;
+                        if (!cellValue.isEmpty())
+                            insertStatement.setString(i, cellValue.substring(0, cellValue.length() > Integer.parseInt(fieldLength.get(idx + 1).toString()) ? Integer.parseInt(fieldLength.get(idx + 1).toString()) : cellValue.length()));
+
+                        else
+                            insertStatement.setObject(i, null, Types.NVARCHAR);
+
+                    }
                 }
 
                 idx = idx + 1;
@@ -362,5 +374,10 @@ public  class InsertTableBase implements  InsertTable{
             excelRow = null;
         }
     }
+    private int AddRow(Map<String,String> inputRecord)
+    {
+        for (Map.Entry<String, String> entry : inputRecord.entrySet()) {
 
+        }
+    }
 }

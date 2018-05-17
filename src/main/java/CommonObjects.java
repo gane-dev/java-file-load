@@ -1,89 +1,144 @@
 import javax.print.DocFlavor;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class CommonObjects {
     static String archivePath="";
     static String filePath="";
     static String errorPath="";
     static  String connectionString="";
-    public static String TableQuery(TableType type) {
-        String qry="";
-        switch (type) {
-            case DIST_MASTER_STG1: {
-                qry ="INSERT INTO DIST_MASTER_STG1 " +
-                        "( BEGIN_USAGE_DATE," +
-                        "END_USAGE_DATE," +
-                        "DIST_ID," +
-                        "DIST_CUST_NUM," +
-                        "DIST_CUST_NAME," +
-                        "DIST_CUST_ADDRESS," +
-                        "DIST_CUST_ADDRESS2," +
-                        "DIST_CUST_CITY," +
-                        "DIST_CUST_STATE," +
-                        "DIST_CUST_ZIP_CD," +
-                        //  "CUST_ZIP_CD_PLUS," +
-                        "DIST_PROD_NUM," +
-                        "DIST_GTIN," +
-                        "MFR_NAME," +
-                        "MFR_PROD_NUM," +
-                        "BRAND_NAME," +
-                        "CASE_PACK_LITERAL," +
-                        "CASE_PACK_QTY," +
-                        "UNIT_OF_ISSUE," +
-                        "UNIT_OF_MEASURE_DESC," +
-                        "DIST_PROD_DESC," +
-                        "TOTAL_USAGE_IN_UNITS," +
-                        "DIST_SIZE_INDICATOR," +
-                        "WEIGHT_SHIPPED," +
-                        "DIST_WEIGHT_SHIPPED_INDICATOR," +
-                        "TOTAL_DIST_SELL_DOLLARS," +
-                        "CURRENCY_TYPE," +
-                        "DIST_INVOICE_ID," +
-                        "DIST_INVOICE_DT," +
-                        "DIST_PO_ID," +
-                        "DIST_PO_DT," +
-//            "BOX_BEEF_YN" +
-//            "PRIVATE_LABEL_YN" +
-//            "SOURCED_YN" +
-//            "DROP_SHIP_FLAG" +
-//            "VENDOR_CODE" +
-//            "STD_MARKUP_FLAG" +
-//            "DIVERSITY_TYPE" +
-                        "STATUS, " +
-                        "MASTER_FILE_ID" +
+    static String qry_excel_master;
+    static String qry_excel_option_master="";
+    static String qry_item="";
+    static String qry_usage="";
+    static String qry_cust="";
+    static String qry_log="";
+    static String qry_control="";
+    static String qry_track="";
+    static Map<String,FieldType> map_excel_master = null;
+    public static String TableQuery(TableType type, FileType fileType) {
 
-                        " ) "
-                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-                break;
+        switch (type) {
+
+            case DIST_MASTER_STG1: {
+                if ( fileType == FileType.EXCEL) {
+                    if (qry_excel_master.equals(""))
+                        qry_excel_master = "INSERT INTO DIST_MASTER_STG1 " +
+                                "( BEGIN_USAGE_DATE," +
+                                "END_USAGE_DATE," +
+                                "DIST_ID," +
+                                "DIST_CUST_NUM," +
+                                "DIST_CUST_NAME," +
+                                "DIST_CUST_ADDRESS," +
+                                "DIST_CUST_ADDRESS2," +
+                                "DIST_CUST_CITY," +
+                                "DIST_CUST_STATE," +
+                                "DIST_CUST_ZIP_CD," +
+                                //  "CUST_ZIP_CD_PLUS," +
+                                "DIST_PROD_NUM," +
+                                "DIST_GTIN," +
+                                "MFR_NAME," +
+                                "MFR_PROD_NUM," +
+                                "BRAND_NAME," +
+                                "CASE_PACK_LITERAL," +
+                                "CASE_PACK_QTY," +
+                                "UNIT_OF_ISSUE," +
+                                "UNIT_OF_MEASURE_DESC," +
+                                "DIST_PROD_DESC," +
+                                "TOTAL_USAGE_IN_UNITS," +
+                                "DIST_SIZE_INDICATOR," +
+                                "WEIGHT_SHIPPED," +
+                                "DIST_WEIGHT_SHIPPED_INDICATOR," +
+                                "TOTAL_DIST_SELL_DOLLARS," +
+                                "CURRENCY_TYPE," +
+                                "DIST_INVOICE_ID," +
+                                "DIST_INVOICE_DT," +
+                                "DIST_PO_ID," +
+                                "DIST_PO_DT," +
+
+                                "STATUS, " +
+                                "MASTER_FILE_ID" +
+
+                                " ) "
+                                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    return qry_excel_master;
+                }
+                else {
+                    if (qry_excel_option_master.equals(""))
+                        qry_excel_option_master = "INSERT INTO DIST_MASTER_STG1 " +
+                                "( BEGIN_USAGE_DATE," +
+                                "END_USAGE_DATE," +
+                                "DIST_ID," +
+                                "DIST_CUST_NUM," +
+                                "DIST_CUST_NAME," +
+                                "DIST_CUST_ADDRESS," +
+                                "DIST_CUST_ADDRESS2," +
+                                "DIST_CUST_CITY," +
+                                "DIST_CUST_STATE," +
+                                "DIST_CUST_ZIP_CD," +
+                                //  "CUST_ZIP_CD_PLUS," +
+                                "DIST_PROD_NUM," +
+                                "DIST_GTIN," +
+                                "MFR_NAME," +
+                                "MFR_PROD_NUM," +
+                                "BRAND_NAME," +
+                                "CASE_PACK_LITERAL," +
+                                "CASE_PACK_QTY," +
+                                "UNIT_OF_ISSUE," +
+                                "UNIT_OF_MEASURE_DESC," +
+                                "DIST_PROD_DESC," +
+                                "TOTAL_USAGE_IN_UNITS," +
+                                "DIST_SIZE_INDICATOR," +
+                                "WEIGHT_SHIPPED," +
+                                "DIST_WEIGHT_SHIPPED_INDICATOR," +
+                                "TOTAL_DIST_SELL_DOLLARS," +
+                                "CURRENCY_TYPE," +
+                                "DIST_INVOICE_ID," +
+                                "DIST_INVOICE_DT," +
+                                "DIST_PO_ID," +
+                                "DIST_PO_DT," +
+
+                                "STATUS, " +
+                                "MASTER_FILE_ID" +
+
+                                " ) "
+                                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+                    return qry_excel_option_master;
+                }
             }
 
             case DIST_ITEM_STG1: {
-                qry ="INSERT INTO DIST_ITEM_STG1 " +
-                        "( BEGIN_USAGE_DATE," +
-                        "END_USAGE_DATE," +
-                        "DIST_ID," +
+                if (qry_item.equals(""))
+                    qry_item = "INSERT INTO DIST_ITEM_STG1 " +
+                            "( BEGIN_USAGE_DATE," +
+                            "END_USAGE_DATE," +
+                            "DIST_ID," +
 
-                        "DIST_PROD_NUM," +
-                        "MFR_NAME," +
-                        "MFR_PROD_NUM," +
-                        "BRAND_NAME," +
-                        "DIST_GTIN_UPC," +
-                        "CASE_PACK_LITERAL," +
-                        "CASE_PACK_QTY," +
-                        "UNIT_OF_ISSUE," +
-                        "UNIT_OF_MEASURE_DESC," +
-                        "DIST_PROD_DESC," +
-                        "DIST_ALT_ITEM_ID," +
-                        "FILE_ID," +
-                        "STATUS, " +
-                        "MASTER_FILE_ID" +
-                        " ) "
-                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-                break;
-            }
+                            "DIST_PROD_NUM," +
+                            "MFR_NAME," +
+                            "MFR_PROD_NUM," +
+                            "BRAND_NAME," +
+                            "DIST_GTIN_UPC," +
+                            "CASE_PACK_LITERAL," +
+                            "CASE_PACK_QTY," +
+                            "UNIT_OF_ISSUE," +
+                            "UNIT_OF_MEASURE_DESC," +
+                            "DIST_PROD_DESC," +
+                            "DIST_ALT_ITEM_ID," +
+                            "FILE_ID," +
+                            "STATUS, " +
+                            "MASTER_FILE_ID" +
+                            " ) "
+                            + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    return qry_item;
+                }
+
             case DIST_CUST_STG1:
-            {   qry = "INSERT INTO DIST_CUST_STG1 " +
+
+            {   if (qry_cust.equals(""))
+                qry_cust = "INSERT INTO DIST_CUST_STG1 " +
                     "( BEGIN_USAGE_DATE," +
                     "END_USAGE_DATE," +
                     "DIST_ID," +
@@ -101,10 +156,13 @@ public class CommonObjects {
                     "MASTER_FILE_ID" +
                     " ) "
                     + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-                break;
+            return  qry_cust;
             }
             case DIST_USAGE_STG1:
-            {  qry= "INSERT INTO DIST_USAGE_STG1 " +
+
+            {
+                if (qry_usage.equals(""))
+                qry_usage= "INSERT INTO DIST_USAGE_STG1 " +
                     "( BEGIN_USAGE_DATE," +
                     "END_USAGE_DATE," +
                     "DIST_ID," +
@@ -115,7 +173,8 @@ public class CommonObjects {
                     "DIST_SIZE_INDICATOR," +
 
                     "WEIGHT_SHIPPED," +
-                    "WEIGHT_SHIPPED_INDICATOR," +
+                    "WEIGHT_SHIPPED_INDICATOR, " +
+                    "DIST_WEIGHT_SHIPPED_INDICATOR, " +
                     "TOTAL_DIST_SELL_DOLLARS," +
                     "CURRENCY_TYPE," +
                     "DIST_INVOICE_ID," +
@@ -126,12 +185,13 @@ public class CommonObjects {
                     "STATUS, " +
                     "MASTER_FILE_ID" +
                     " ) "
-                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-                break;
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                return qry_usage;
             }
             case LD_LOADER_LOG:
             {
-                qry="INSERT INTO LD_LOADER_LOG " +
+                if(qry_log.equals(""))
+                qry_log="INSERT INTO LD_LOADER_LOG " +
                         "(FILE_NAME, " +
                         "RECORDS_SKIPPED," +
                         "RECORDS_READ," +
@@ -149,22 +209,24 @@ public class CommonObjects {
                         "MASTER_FILE_ID" +
 
                         " ) "  + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-                break;
+                return qry_log;
             }
             case DIST_CONTROL_TOTALS:
             {
-                qry ="INSERT INTO DIST_CONTROL_TOTALS " +
+                    if (qry_control.equals(""))
+                qry_control ="INSERT INTO DIST_CONTROL_TOTALS " +
                     "(FILE_ID, " +
                     "TOTAL_ROW_COUNT," +
                     "TOTAL_QTY," +
                     "TOTAL_SPEND," +
                     "MASTER_FILE_ID" +
                     " ) "  + " VALUES (?,?,?,?,?)";
-                break;
+                    return  qry_control;
             }
             case LD_SRC_FILE_TRACK:
             {
-                qry ="INSERT INTO LD_SRC_FILE_TRACK " +
+                if (qry_track.equals(""))
+                qry_track ="INSERT INTO LD_SRC_FILE_TRACK " +
                         "(SOURCE_TYPE, " +
                         "SOURCE_ID," +
                         "ENTITY," +
@@ -177,13 +239,13 @@ public class CommonObjects {
                         "TABLE_NAME," +
                         "FILE_ID" +
                         " ) "  + " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-                break;
+                return  qry_track;
             }
         }
-        return  qry;
+        return "";
     }
 
-    public static int[] DecimalIndex(TableType type) {
+    public static int[] DecimalIndex(TableType type, FileType fileType) {
 
         switch (type) {
             case DIST_MASTER_STG1: {
@@ -207,8 +269,9 @@ public class CommonObjects {
         }
         return  null;
     }
-    public static Map ReturnMap(TableType type)
+    public static Map ReturnMap(TableType type, FileType fileType)
     {
+
         Map temp = new HashMap<Integer,Integer>();
         switch (type){
             case DIST_MASTER_STG1:
@@ -289,7 +352,7 @@ public class CommonObjects {
                 temp.put(5, 40);
                 temp.put(6, 14);
                 temp.put(7, 0);
-                temp.put(8, 0);
+                temp.put(8, 3);
                 temp.put(9, 0);
                 temp.put(10, 3);
                 temp.put(11, 0);
