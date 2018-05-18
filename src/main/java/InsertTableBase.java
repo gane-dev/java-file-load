@@ -1,19 +1,20 @@
+import javafx.scene.control.Tab;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.lang.reflect.Field;
+import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Scanner;
 
 
 public  class InsertTableBase implements  InsertTable{
     private Connection conn;
-    Map fieldLength;
+    Map<String,FieldType> fieldLength;
     private String insertSQL;
     PreparedStatement insertStatement;
     int rowCount = 0;
@@ -25,7 +26,7 @@ public  class InsertTableBase implements  InsertTable{
     String distId;
     int totalRecords=0;
     FileType fileType;
-
+    Map<String,Integer> typeMapping=null;
     public InsertTableBase( TableType p_table,String p_fileName,FileType p_fileType) {
         conn = JdbcOracleConnection.getConnection(CommonObjects.getConnectionString());
 
@@ -38,6 +39,8 @@ public  class InsertTableBase implements  InsertTable{
 
         fileId = ReadDB.getFileId(conn);
          distId= ReadDB.getSupplierId(fileName.substring(0,fileName.indexOf("_")),conn);
+        typeMapping = CommonObjects.GetDataType();
+
     }
     public int InsertRecord(boolean finalCommit,Row excelRow,String rec,Double totalRecords){
         try {
@@ -110,6 +113,108 @@ public  class InsertTableBase implements  InsertTable{
             return -1;
         }
     }
+    private int AddCell(String key, String val)
+    {
+        try {
+            FieldType field = null;
+            if (fieldLength.containsKey(key)) {
+                field = fieldLength.get(key);
+
+                if (!val.isEmpty()) {
+                    switch (field.getDataType()) {
+                        case "char": {
+                            insertStatement.setString(field.getFieldKey(), val.substring(0, val.length() > field.getFieldLength() ? field.getFieldLength() : val.length()));
+                        }
+                        case "decimal": {
+                            val = val.replaceAll(patt, "");
+                            if (!val.isEmpty())
+                                insertStatement.setDouble(field.getFieldKey(), Double.parseDouble(val));
+                            else
+                                insertStatement.setObject(field.getFieldKey(), null, typeMapping.get(field.getDataType()));
+                        }
+                        case "date":
+                        {
+                            if (tableType == TableType.DIST_MASTER_STG1){
+                                if (val.indexOf("/") < 0) {
+                                    double dateVal = Double.parseDouble(val) ;
+                                  //  if (dateVal < 59)  dateVal -= 1; //Excel/Lotus 2/29/1900 bug
+                                        insertStatement.setString(field.getFieldKey(),new SimpleDateFormat("MM/dd/yyyy").format(DateUtil.getJavaDate(dateVal)));
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                    insertStatement.setObject(field.getFieldKey(), null, typeMapping.get(field.getDataType()));
+                }
+
+                    return 0;
+            }
+
+        catch (SQLException sqx)
+        {
+            logger.error("Error",sqx);
+            return  -1;
+        }
+    }
+    public int AddRow(Map<String,String> rec)
+    {
+
+        try{
+        if (insertStatement  == null)
+            insertStatement  =conn.prepareStatement(insertSQL);
+        for(String k : rec.keySet())
+        {
+            if (!rec.get(k).equals("ZZZZZ"))
+                AddCell(k,rec.get(k));
+            else {
+                AddControlLog(rec);
+                break;
+            }
+        }
+
+        AddStdFields(rec.size()-1);
+        insertStatement.addBatch();
+        return  0;
+    }
+        catch (NumberFormatException numEx){
+        logger.error("Error",numEx);
+        return  -1;
+    }
+        catch (SQLException ex)
+    {
+        logger.error("Error",ex);
+        return -1;
+    }
+        finally {
+
+    }
+    }
+    private void AddStdFields(int idx)
+    {
+      try {
+          switch (tableType) {
+              case DIST_MASTER_STG1: {
+                  insertStatement.setString(idx, "N");
+                  idx++;
+                  insertStatement.setString(idx, "M" + fileId);
+                  break;
+              }
+              default:
+              {
+                  insertStatement.setInt(idx, fileId);
+                  idx++;
+                  insertStatement.setString(idx, "N");
+                  idx++;
+                  insertStatement.setString(idx, "M" + fileId);
+              }
+          }
+          }
+      catch (SQLException sqx)
+      {
+          logger.error("Error",sqx);
+      }
+    }
     public int AddRow(Row excelRow,String rec){
 
         int result=-1;
@@ -152,6 +257,27 @@ public  class InsertTableBase implements  InsertTable{
         }
 
         return  result;
+    }
+    private Double ProcessTotals(Object val)
+    {
+
+
+}
+    private int AddControlLog(Map<String,String> controlRec){
+        Double usageCount =0.0;
+        Double spendCount=0.0;
+        Double totalCount=0.0;
+        try{
+        Object[] logArray =  controlRec.values().toArray();
+
+        totalCount = ProcessTotals(logArray[1]);
+        usageCount = ProcessTotals(logArray[2]);
+        spendCount = ProcessTotals(logArray[3]);
+        return InsertControlTotal(totalCount, usageCount, spendCount);
+    } catch (Exception ex) {
+        logger.error("Error", ex);
+        return -1;
+        }
     }
     private int AddControlLog(Row excelRow,String rec) {
         Double usageCount =0.0;
@@ -200,6 +326,7 @@ public  class InsertTableBase implements  InsertTable{
             }
 
     }
+
     private int InsertControlTotal(Double p_totalRecords, Double usageCount,Double spendCount)
     {
         try {
@@ -259,6 +386,9 @@ public  class InsertTableBase implements  InsertTable{
                 insertStatement  =conn.prepareStatement(insertSQL);
             Scanner sc = new Scanner(rec);
             sc.useDelimiter("[|]");
+            if (fileType == FileType.TEXT_BANG_USAGE)
+                sc.useDelimiter("[!]");
+
             while(sc.hasNext() && idx < fieldLength.size()){
 
             String cellValue = sc.next();
@@ -295,10 +425,10 @@ public  class InsertTableBase implements  InsertTable{
                 i = i + 1;
             }
                 insertStatement.setInt(i, fileId);
-                i = i + 1;
-                insertStatement.setString(i, "N");
-                i = i + 1;
-                insertStatement.setString(i, "M" + fileId);
+            i = i + 1;
+            insertStatement.setString(i, "N");
+            i = i + 1;
+            insertStatement.setString(i, "M" + fileId);
                 insertStatement.addBatch();
                 return 0;
 
@@ -374,10 +504,5 @@ public  class InsertTableBase implements  InsertTable{
             excelRow = null;
         }
     }
-    private int AddRow(Map<String,String> inputRecord)
-    {
-        for (Map.Entry<String, String> entry : inputRecord.entrySet()) {
 
-        }
-    }
 }

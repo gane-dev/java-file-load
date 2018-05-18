@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Scanner;
 //import java.text.DecimalFormat;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
@@ -29,11 +30,25 @@ public class ExcelTextFile {
     final static Logger logger = Logger.getLogger(ExcelTextFile.class);
     private File file;
     FileType fileType;
-
+    InsertTableBase insertTable =null;
     public ExcelTextFile(File p_file,FileType p_fileType) {
 
         file = p_file;
         fileType =p_fileType;
+        if (fileType == FileType.EXCEL || fileType == FileType.EXCEL_OPTION) {
+            insertTable = new InsertTableBase(TableType.DIST_MASTER_STG1, file.getName(), fileType);
+        }
+        else {
+            if (file.getName().toUpperCase().indexOf("_U") > 0) {
+
+                insertTable = new InsertTableBase(TableType.DIST_USAGE_STG1, file.getName(), fileType);
+            } else if (file.getName().toUpperCase().indexOf("_C") > 0) {
+
+                insertTable = new InsertTableBase(TableType.DIST_CUST_STG1, file.getName(), fileType);
+            } else if (file.getName().toUpperCase().indexOf("_I") > 0) {
+                insertTable = new InsertTableBase(TableType.DIST_ITEM_STG1, file.getName(), fileType);
+            }
+        }
     }
 
     public int LoadFile() {
@@ -53,7 +68,7 @@ public class ExcelTextFile {
             XSSFReader r = new XSSFReader(pkg);
             SharedStringsTable sst = r.getSharedStringsTable();
 
-            XMLReader parser = fetchSheetParser(sst);
+            XMLReader parser = fetchSheetParser(sst,insertTable);
 
 
             // To look up the Sheet Name / Sheet Order / rID,
@@ -61,13 +76,26 @@ public class ExcelTextFile {
             // Normally it's of the form rId# or rSheet# InputStream sheet2 = r.getSheet("rId2");
            // InputSource sheetSource = new InputSource(sheet2);
             Iterator<InputStream> sheets = r.getSheetsData();
-            while(sheets.hasNext()) {
+            if(sheets.hasNext()) {
                 InputStream sheet = sheets.next();
                 InputSource sheetSource = new InputSource(sheet);
                 parser.parse(sheetSource);
                 sheet.close();
-                break;
+               int masterResult = insertTable.InsertRecord(true,null, null,0.0);
+                if (masterResult != 0)
+                {
+                    System.out.println("Log=> " + "Error updating loader log table:" + file.getName());
+                    logger.error("Error updating loader log table:" + file.getName());
+                    return -1;
+                }
+
+            } else {
+
+                //skip file - empty
+                logger.info("File empty :" + file.getName());
+                return 1;
             }
+
             return 0;
         }
         catch (SAXException sax)
@@ -89,12 +117,12 @@ public class ExcelTextFile {
 
         }
     }
-    private XMLReader fetchSheetParser(SharedStringsTable sst)  throws SAXException {
+    private XMLReader fetchSheetParser(SharedStringsTable sst,InsertTableBase insertTable)  throws SAXException {
         XMLReader parser =
                 XMLReaderFactory.createXMLReader(
                         "org.apache.xerces.parsers.SAXParser"
                 );
-        ContentHandler handler = new SheetHandler(sst);
+        ContentHandler handler = new SheetHandler(sst,insertTable);
         parser.setContentHandler(handler);
         return parser;
     }
@@ -102,9 +130,34 @@ public class ExcelTextFile {
         private SharedStringsTable sst;
         private String lastContents;
         private boolean nextIsString;
-
-        private SheetHandler(SharedStringsTable sst) {
+        private Map<String,String> row=null;
+        InsertTableBase insertTable =null;
+        private SheetHandler(SharedStringsTable sst, InsertTableBase p_insertTable ) {
             this.sst = sst;
+            this.insertTable = p_insertTable;
+        }
+        private String key="";
+
+        private  int rowNum=1;
+        private int cellNum=1;
+        private void AddCellToRow(String p_key, String p_val)
+        {
+            if (!p_val.equals("")) {
+                row.put(key, p_val);
+                key="";
+              //  val="";
+            }
+            else{
+                key =p_key;
+                if (!(key.substring(-1) == String.valueOf(rowNum)))
+                {
+                 //next row
+                 insertTable.AddRow(row);
+                    insertTable.rowCount++;
+                }
+            }
+
+
         }
 
         public void startElement(String uri, String localName, String name,
@@ -112,7 +165,8 @@ public class ExcelTextFile {
             // c => cell
             if(name.equals("c")) {
                 // Print the cell reference
-                System.out.print(attributes.getValue("r") + " - ");
+               // System.out.print(attributes.getValue("r") + " - ");
+                AddCellToRow(attributes.getValue("r"),null);
                 //r - rownum
                 // Figure out if the value is an index in the SST
                 String cellType = attributes.getValue("t");
@@ -149,7 +203,62 @@ public class ExcelTextFile {
             lastContents += new String(ch, start, length);
         }
     }
+    public Map<String,String> AddTextCells(String rec) {
 
+        Map<String, String> textCells = null;
+        Scanner sc = new Scanner(rec);
+        sc.useDelimiter("[|]");
+        if (fileType == FileType.TEXT_BANG_USAGE)
+            sc.useDelimiter("[!]");
+        int idx = 1;
+        while (sc.hasNext()) {
+            textCells.put(String.valueOf(idx), sc.next());
+        }
+        return textCells;
+    }
+    private int processTextFiles() {
+        int rowIndex = 1;
+        int cacheSize = 1;
+        logger.info("Open Text");
+
+        int masterResult = -2;
+        Scanner sc = null;
+        String str=null;
+        try {
+            sc = new Scanner(file);
+            // Check if there is another line of input
+            while (sc.hasNextLine()) {
+                str = sc.nextLine();
+                insertTable.AddRow(AddTextCells(str));
+                rowIndex++;
+            }
+            masterResult = insertTable.InsertRecord(true,null, str,rowIndex+0.0);
+            if (masterResult != 0)
+            {
+                System.out.println("Log=> " + "Error updating loader log table:" + file.getName());
+                logger.error("Error updating loader log table:" + file.getName());
+                return -1;
+            }
+
+            else {
+
+                System.out.println("Log=> " +"Completed :" + file.getName());
+                logger.info("Completed :" + file.getName());
+                return 0;
+            }
+
+        } catch (FileNotFoundException e) {
+            logger.error("Error",e);
+        }
+        catch (Exception e) {
+            logger.error("Error",e);
+        }
+        finally {
+            sc.close();
+            sc=null;
+        }
+        return 0;
+    }
     private int processTextFile() {
         int rowIndex = 1;
         int cacheSize = 1;

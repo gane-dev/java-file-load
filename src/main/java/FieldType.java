@@ -1,11 +1,18 @@
 public class FieldType {
-    private String fieldKey;
+    private int fieldKey;
 
-    public String getFieldKey() {
+    public FieldType(int fieldKey, String fieldName, String dataType, int fieldLength) {
+        this.fieldKey = fieldKey;
+        this.fieldName = fieldName;
+        this.dataType = dataType;
+        this.fieldLength = fieldLength;
+    }
+
+    public int getFieldKey() {
         return fieldKey;
     }
 
-    public void setFieldKey(String fieldKey) {
+    public void setFieldKey(int fieldKey) {
         this.fieldKey = fieldKey;
     }
 
