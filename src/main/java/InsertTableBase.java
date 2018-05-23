@@ -1,11 +1,11 @@
-import javafx.scene.control.Tab;
+//import javafx.scene.control.Tab;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 
-import java.lang.reflect.Field;
+//import java.lang.reflect.Field;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Map;
@@ -32,8 +32,8 @@ public  class InsertTableBase implements  InsertTable{
 
         tableType=p_table;
         fileType = p_fileType;
-        fieldLength = CommonObjects.ReturnMap(p_table,fileType) ;
-        decimalIndex=CommonObjects.DecimalIndex(p_table,fileType);
+        fieldLength = CommonObjects.FieldMappings(p_table,fileType) ;
+      //  decimalIndex=CommonObjects.DecimalIndex(p_table,fileType);
         insertSQL = CommonObjects.TableQuery(p_table,fileType);
         fileName = p_fileName;
 
@@ -49,7 +49,7 @@ public  class InsertTableBase implements  InsertTable{
                     insertStatement.executeBatch();
                     if (finalCommit) {
                         AddLoaderLog(totalRecords);
-                        AddControlLog(excelRow,rec);
+                        //AddControlLog(excelRow,rec);
                         if (tableType != TableType.DIST_MASTER_STG1)
                             AddSrcTrack();
                         conn.commit();
@@ -57,6 +57,7 @@ public  class InsertTableBase implements  InsertTable{
                     else
                     {
                         insertStatement=conn.prepareStatement(insertSQL);
+
                     }
 
 
@@ -124,6 +125,7 @@ public  class InsertTableBase implements  InsertTable{
                     switch (field.getDataType()) {
                         case "char": {
                             insertStatement.setString(field.getFieldKey(), val.substring(0, val.length() > field.getFieldLength() ? field.getFieldLength() : val.length()));
+                        break;
                         }
                         case "decimal": {
                             val = val.replaceAll(patt, "");
@@ -131,6 +133,7 @@ public  class InsertTableBase implements  InsertTable{
                                 insertStatement.setDouble(field.getFieldKey(), Double.parseDouble(val));
                             else
                                 insertStatement.setObject(field.getFieldKey(), null, typeMapping.get(field.getDataType()));
+                            break;
                         }
                         case "date":
                         {
@@ -141,6 +144,7 @@ public  class InsertTableBase implements  InsertTable{
                                         insertStatement.setString(field.getFieldKey(),new SimpleDateFormat("MM/dd/yyyy").format(DateUtil.getJavaDate(dateVal)));
                                 }
                             }
+                            break;
                         }
                     }
                 }
@@ -160,22 +164,29 @@ public  class InsertTableBase implements  InsertTable{
     public int AddRow(Map<String,String> rec)
     {
 
-        try{
-        if (insertStatement  == null)
-            insertStatement  =conn.prepareStatement(insertSQL);
-        for(String k : rec.keySet())
-        {
-            if (!rec.get(k).equals("ZZZZZ"))
-                AddCell(k,rec.get(k));
-            else {
-                AddControlLog(rec);
-                break;
+        boolean cntrlLog = false;
+        try {
+            if (rowCount != 0) {
+            if (insertStatement == null) {
+                insertStatement = conn.prepareStatement(insertSQL);
+                AddDefaultValues();
             }
-        }
+            for (String k : rec.keySet()) {
 
-        AddStdFields(rec.size()-1);
-        insertStatement.addBatch();
-        return  0;
+                if (!rec.get(k).equals("ZZZZZ"))
+                    AddCell(k, rec.get(k));
+                else {
+                    AddControlLog(rec);
+                    cntrlLog = true;
+                    break;
+                }
+            }
+            if (!cntrlLog)
+                AddStdFields(rec.size() - 1);
+            insertStatement.addBatch();
+        }
+            return 0;
+
     }
         catch (NumberFormatException numEx){
         logger.error("Error",numEx);
@@ -260,9 +271,10 @@ public  class InsertTableBase implements  InsertTable{
     }
     private Double ProcessTotals(Object val)
     {
-
-
-}
+        if (val != null)
+            return Double.parseDouble(val.toString());
+        return  -1.0;
+    }
     private int AddControlLog(Map<String,String> controlRec){
         Double usageCount =0.0;
         Double spendCount=0.0;
@@ -273,7 +285,10 @@ public  class InsertTableBase implements  InsertTable{
         totalCount = ProcessTotals(logArray[1]);
         usageCount = ProcessTotals(logArray[2]);
         spendCount = ProcessTotals(logArray[3]);
-        return InsertControlTotal(totalCount, usageCount, spendCount);
+        if (totalCount != -1.0 && usageCount != -1.0 && spendCount != -1.0 )
+            return InsertControlTotal(totalCount, usageCount, spendCount);
+        else
+            return  -1;
     } catch (Exception ex) {
         logger.error("Error", ex);
         return -1;
@@ -504,5 +519,17 @@ public  class InsertTableBase implements  InsertTable{
             excelRow = null;
         }
     }
+    private void AddDefaultValues()
+    {
+        try {
+                       for(FieldType field: fieldLength.values()) {
+                        insertStatement.setObject(field.getFieldKey(), null, typeMapping.get(field.getDataType()));
+                    }
 
+        }
+        catch (SQLException sqx)
+        {
+            logger.error("Error",sqx);
+        }
+    }
 }

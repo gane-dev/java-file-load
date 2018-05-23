@@ -9,7 +9,7 @@ public class CommonObjects {
     static String filePath="";
     static String errorPath="";
     static  String connectionString="";
-    static String qry_excel_master;
+    static String qry_excel_master="";
     static String qry_excel_option_master="";
     static String qry_item="";
     static String qry_usage="";
@@ -30,8 +30,10 @@ public class CommonObjects {
             case DIST_MASTER_STG1: {
                 if (fileType == FileType.EXCEL) {
                     if (map_excel_master == null) {
-                        map_excel_master.put("A", new FieldType(1, "Begin Usage Date", "char", 20));
-                        map_excel_master.put("B", new FieldType(2, "End Usage Date", "char", 20));
+                        map_excel_master =  new HashMap<String, FieldType>();
+
+                        map_excel_master.put("A", new FieldType(1, "Begin Usage Date", "date", 20));
+                        map_excel_master.put("B", new FieldType(2, "End Usage Date", "date", 20));
                         map_excel_master.put("C", new FieldType(3, "Distributor Warehouse ID", "char", 7));
 
                         map_excel_master.put("D", new FieldType(4, "Customer Number", "char", 40));
@@ -72,13 +74,14 @@ public class CommonObjects {
                         map_excel_master.put("AE", new FieldType(30, "PO Num", "char", 20));
                         map_excel_master.put("AF", new FieldType(31, "PO Date", "date", 20));
 
-                    } else
-                        return map_excel_master;
+                    }
+                      return map_excel_master;
 
                 } else {
                     if (map_excel_option_master == null) {
-                        map_excel_option_master.put("A", new FieldType(1, "Begin Usage Date", "char", 20));
-                        map_excel_option_master.put("B", new FieldType(2, "End Usage Date", "char", 20));
+                        map_excel_option_master =  new HashMap<String, FieldType>();
+                        map_excel_option_master.put("A", new FieldType(1, "Begin Usage Date", "date", 20));
+                        map_excel_option_master.put("B", new FieldType(2, "End Usage Date", "date", 20));
                         map_excel_option_master.put("C", new FieldType(3, "Distributor Warehouse ID", "char", 7));
 
                         map_excel_option_master.put("D", new FieldType(4, "Customer Number", "char", 40));
@@ -119,12 +122,13 @@ public class CommonObjects {
                         map_excel_option_master.put("AD1", new FieldType(23, "PO Num", "char", 20));
                         map_excel_option_master.put("AE1", new FieldType(24, "PO Date", "date", 20));
 
-                    } else
+                    }
                         return map_excel_option_master;
                 }
             }
             case DIST_ITEM_STG1: {
                 if (map_item == null) {
+                    map_item =  new HashMap<String, FieldType>();
                     map_item.put("1", new FieldType(1, "Begin Usage Date", "char", 20));
                     map_item.put("2", new FieldType(2, "End Usage Date", "char", 20));
                     map_item.put("3", new FieldType(3, "Distributor Warehouse ID", "char", 7));
@@ -144,12 +148,13 @@ public class CommonObjects {
                     map_item.put("13", new FieldType(13, "GTIN/UPC", "char", 50));
                     map_item.put("14", new FieldType(14, "Manufacturer Name", "char", 15));
 
-                } else
-                    return map_item;
+                }
+                return map_item;
             }
 
             case DIST_CUST_STG1: {
                 if (map_cust == null) {
+                    map_cust =  new HashMap<String, FieldType>();
                     map_cust.put("1", new FieldType(1, "Begin Usage Date", "char", 20));
                     map_cust.put("2", new FieldType(2, "End Usage Date", "char", 20));
                     map_cust.put("3", new FieldType(3, "Distributor Warehouse ID", "char", 7));
@@ -166,8 +171,8 @@ public class CommonObjects {
                     map_cust.put("11", new FieldType(11, "Country Code", "char", 3));
 
 
-                } else
-                    return map_cust;
+                }
+                  return map_cust;
             }
 
             case DIST_USAGE_STG1:
@@ -176,6 +181,7 @@ public class CommonObjects {
                 if (fileType == FileType.TEXT_TAB_USAGE || fileType == FileType.TEXT_BANG_USAGE
                         || fileType == FileType.TEXT_PIPE_USAGE || fileType == FileType.TEXT_CAT_USAGE || fileType == FileType.TEXT_SYS_USAGE) {
                     if (map_usage == null) {
+                        map_usage =  new HashMap<String, FieldType>();
                         map_usage.put("1", new FieldType(1, "Begin Usage Date", "char", 20));
                         map_usage.put("2", new FieldType(2, "End Usage Date", "char", 20));
                         map_usage.put("3", new FieldType(3, "Distributor Warehouse ID", "char", 7));
@@ -198,10 +204,11 @@ public class CommonObjects {
 
                         map_usage.put("16", new FieldType(16, "Brand Name", "char", 20));
 
-                    } else
+                    }
                         return map_usage;
                 } else if (fileType == FileType.TEXT_OPTION_USAGE) {
                     if (map_option_usage == null) {
+                        map_option_usage =  new HashMap<String, FieldType>();
                         map_option_usage.put("1", new FieldType(1, "Begin Usage Date", "char", 20));
                         map_option_usage.put("2", new FieldType(2, "End Usage Date", "char", 20));
                         map_option_usage.put("3", new FieldType(3, "Distributor Warehouse ID", "char", 7));
@@ -224,7 +231,7 @@ public class CommonObjects {
 
                         map_option_usage.put("16", new FieldType(13, "Brand Name", "char", 20));
 
-                    } else
+                    }
                         return map_option_usage;
                 }
             }
@@ -737,14 +744,16 @@ public class CommonObjects {
     {
         if (dataTypes ==null)
         {
+            dataTypes= new HashMap<String, Integer>();
             dataTypes.put("decimal",Types.DECIMAL);
             dataTypes.put("char",Types.NVARCHAR);
+            dataTypes.put("date",Types.NVARCHAR);
             return  dataTypes;
 
 
 
         }
-        else
+
             return  dataTypes;
     }
 }

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
@@ -54,10 +55,11 @@ public class ExcelTextFile {
     public int LoadFile() {
 
 
-        if (fileType == FileType.EXCEL)
-            return processExcelFile();
-        else if(fileType == FileType.EXCEL_OPTION)
+        if (fileType == FileType.EXCEL || fileType == FileType.EXCEL_OPTION)
+            //return processExcelFile();
             return processExcelAsXml();
+        //else if(fileType == FileType.EXCEL_OPTION)
+          //  return processExcelAsXml();
         else
             return processTextFile();
     }
@@ -130,7 +132,7 @@ public class ExcelTextFile {
         private SharedStringsTable sst;
         private String lastContents;
         private boolean nextIsString;
-        private Map<String,String> row=null;
+        private Map<String,String> row=new HashMap<String,String>();
         InsertTableBase insertTable =null;
         private SheetHandler(SharedStringsTable sst, InsertTableBase p_insertTable ) {
             this.sst = sst;
@@ -142,18 +144,24 @@ public class ExcelTextFile {
         private int cellNum=1;
         private void AddCellToRow(String p_key, String p_val)
         {
+
             if (!p_val.equals("")) {
                 row.put(key, p_val);
                 key="";
               //  val="";
             }
             else{
-                key =p_key;
-                if (!(key.substring(-1) == String.valueOf(rowNum)))
+                //key =p_key;
+                int rwNum = new Scanner(p_key).useDelimiter("\\D+").nextInt();
+                key = p_key.substring(0,p_key.indexOf(String.valueOf(rwNum)));
+              //  if (!(key.substring(1).equals(String.valueOf(rowNum))))
+                if (!(rwNum == rowNum))
                 {
                  //next row
+                rowNum++;
                  insertTable.AddRow(row);
-                    insertTable.rowCount++;
+                 insertTable.rowCount++;
+                 row = new HashMap<String,String>();
                 }
             }
 
@@ -166,7 +174,7 @@ public class ExcelTextFile {
             if(name.equals("c")) {
                 // Print the cell reference
                // System.out.print(attributes.getValue("r") + " - ");
-                AddCellToRow(attributes.getValue("r"),null);
+                AddCellToRow(attributes.getValue("r"),"");
                 //r - rownum
                 // Figure out if the value is an index in the SST
                 String cellType = attributes.getValue("t");
@@ -194,7 +202,8 @@ public class ExcelTextFile {
             // v => contents of a cell
             // Output after we've seen the string contents
             if(name.equals("v")) {
-                System.out.println(lastContents);
+                AddCellToRow("",lastContents);
+                //System.out.println(lastContents);
             }
         }
 
