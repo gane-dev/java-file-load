@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
 //import java.lang.reflect.Field;
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -27,6 +28,7 @@ public  class InsertTableBase implements  InsertTable{
     int totalRecords=0;
     FileType fileType;
     Map<String,Integer> typeMapping=null;
+    Map<String,String > controlRecord=new HashMap<String, String>();
     public InsertTableBase( TableType p_table,String p_fileName,FileType p_fileType) {
         conn = JdbcOracleConnection.getConnection(CommonObjects.getConnectionString());
 
@@ -47,9 +49,10 @@ public  class InsertTableBase implements  InsertTable{
 
 
                     insertStatement.executeBatch();
+                    conn.commit();
                     if (finalCommit) {
-                        AddLoaderLog(totalRecords);
-                        //AddControlLog(excelRow,rec);
+                        AddLoaderLog(rowCount-1.0);
+                        AddControlLog();
                         if (tableType != TableType.DIST_MASTER_STG1)
                             AddSrcTrack();
                         conn.commit();
@@ -169,20 +172,21 @@ public  class InsertTableBase implements  InsertTable{
             if (rowCount != 0) {
             if (insertStatement == null) {
                 insertStatement = conn.prepareStatement(insertSQL);
-                AddDefaultValues();
+
             }
+            AddDefaultValues();
             for (String k : rec.keySet()) {
 
                 if (!rec.get(k).equals("ZZZZZ"))
                     AddCell(k, rec.get(k));
                 else {
-                    AddControlLog(rec);
+                  //  AddControlLog(controlRecord);
                     cntrlLog = true;
                     break;
                 }
             }
             if (!cntrlLog)
-                AddStdFields(rec.size() - 1);
+                AddStdFields();
             insertStatement.addBatch();
         }
             return 0;
@@ -201,18 +205,31 @@ public  class InsertTableBase implements  InsertTable{
 
     }
     }
-    private void AddStdFields(int idx)
+    private void AddStdFields()
     {
+        int idx=0;
       try {
           switch (tableType) {
+
               case DIST_MASTER_STG1: {
+                  idx  =32;
                   insertStatement.setString(idx, "N");
                   idx++;
                   insertStatement.setString(idx, "M" + fileId);
                   break;
               }
+              case DIST_USAGE_STG1: {
+                  idx = 16;
+              }
+              case DIST_CUST_STG1:{
+                  idx=11;
+              }
+              case DIST_ITEM_STG1:{
+                  idx=14;
+              }
               default:
               {
+
                   insertStatement.setInt(idx, fileId);
                   idx++;
                   insertStatement.setString(idx, "N");
@@ -275,12 +292,12 @@ public  class InsertTableBase implements  InsertTable{
             return Double.parseDouble(val.toString());
         return  -1.0;
     }
-    private int AddControlLog(Map<String,String> controlRec){
+    private int AddControlLog(){
         Double usageCount =0.0;
         Double spendCount=0.0;
         Double totalCount=0.0;
         try{
-        Object[] logArray =  controlRec.values().toArray();
+        Object[] logArray =  controlRecord.values().toArray();
 
         totalCount = ProcessTotals(logArray[1]);
         usageCount = ProcessTotals(logArray[2]);
@@ -293,6 +310,18 @@ public  class InsertTableBase implements  InsertTable{
         logger.error("Error", ex);
         return -1;
         }
+    }
+    public int AddControlRec(String val)
+    {
+        try {
+            controlRecord.put(String.valueOf(controlRecord.size() + 1), val);
+        }
+        catch (Exception ex)
+        {
+            return  -1;
+        }
+        return  0;
+
     }
     private int AddControlLog(Row excelRow,String rec) {
         Double usageCount =0.0;
@@ -376,7 +405,7 @@ public  class InsertTableBase implements  InsertTable{
         //insertStatement.setString(10, LocalDate.now().toString());
         insertStatement.setString(9,CommonObjects.getArchivePath());
 
-        insertStatement.setString(10,"TEXT_PIPE");
+        insertStatement.setString(10,fileType.name());
         insertStatement.setString(11,distId);
         insertStatement.setInt(12,0);
         insertStatement.setString(13,"M" + fileId);

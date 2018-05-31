@@ -32,6 +32,7 @@ public class ExcelTextFile {
     private File file;
     FileType fileType;
     InsertTableBase insertTable =null;
+
     public ExcelTextFile(File p_file,FileType p_fileType) {
 
         file = p_file;
@@ -65,8 +66,9 @@ public class ExcelTextFile {
     }
     private int processExcelAsXml()
     {
+        OPCPackage pkg=null;
         try {
-            OPCPackage pkg = OPCPackage.open(file);
+            pkg = OPCPackage.open(file);
             XSSFReader r = new XSSFReader(pkg);
             SharedStringsTable sst = r.getSharedStringsTable();
 
@@ -83,6 +85,7 @@ public class ExcelTextFile {
                 InputSource sheetSource = new InputSource(sheet);
                 parser.parse(sheetSource);
                 sheet.close();
+
                int masterResult = insertTable.InsertRecord(true,null, null,0.0);
                 if (masterResult != 0)
                 {
@@ -116,7 +119,7 @@ public class ExcelTextFile {
             return  -1;
         }
         finally {
-
+            try{pkg.close();}catch (IOException iox) {logger.error("Error",iox);};
         }
     }
     private XMLReader fetchSheetParser(SharedStringsTable sst,InsertTableBase insertTable)  throws SAXException {
@@ -139,7 +142,7 @@ public class ExcelTextFile {
             this.insertTable = p_insertTable;
         }
         private String key="";
-
+        private boolean controlRecord =false;
         private  int rowNum=1;
         private int cellNum=1;
         private void AddCellToRow(String p_key, String p_val)
@@ -149,13 +152,19 @@ public class ExcelTextFile {
                 row.put(key, p_val);
                 key="";
               //  val="";
+                if (p_val.equals("ZZZZZ") || controlRecord) {
+                    controlRecord = true;
+                    insertTable.AddControlRec(p_val);
+                }
+
             }
             else{
                 //key =p_key;
                 int rwNum = new Scanner(p_key).useDelimiter("\\D+").nextInt();
                 key = p_key.substring(0,p_key.indexOf(String.valueOf(rwNum)));
               //  if (!(key.substring(1).equals(String.valueOf(rowNum))))
-                if (!(rwNum == rowNum))
+                if ((!(rwNum == rowNum) ) && !controlRecord)
+
                 {
                  //next row
                 rowNum++;

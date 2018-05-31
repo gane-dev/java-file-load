@@ -45,34 +45,34 @@ public class CommonObjects {
                         map_excel_master.put("I", new FieldType(9, "State", "char", 2));
 
                         map_excel_master.put("J", new FieldType(10, "Zip", "char", 10));
-                        map_excel_master.put("L", new FieldType(11, "Country Code", "char", 10));
-                        map_excel_master.put("M", new FieldType(12, "Distributor Product Number", "char", 40));
+                        map_excel_master.put("K", new FieldType(11, "CUST_COUNTRY_CD", "char", 3));
+                        map_excel_master.put("L", new FieldType(12, "Distributor Product Number", "char", 40));
 
-                        map_excel_master.put("N", new FieldType(13, "GTIN/UPC", "char", 14));
-                        map_excel_master.put("O", new FieldType(14, "Manufacturer Name", "char", 50));
-                        map_excel_master.put("P", new FieldType(15, "Man Product Num", "char", 40));
+                        map_excel_master.put("M", new FieldType(13, "GTIN/UPC", "char", 14));
+                        map_excel_master.put("N", new FieldType(14, "Manufacturer Name", "char", 50));
+                        map_excel_master.put("O", new FieldType(15, "Man Product Num", "char", 40));
 
-                        map_excel_master.put("Q", new FieldType(16, "Brand Name", "char", 50));
-                        map_excel_master.put("R", new FieldType(17, "Unit of Measure Literal", "char", 30));
-                        map_excel_master.put("S", new FieldType(18, "Case Pack Qty", "decimal", 0));
+                        map_excel_master.put("P", new FieldType(16, "Brand Name", "char", 50));
+                        map_excel_master.put("Q", new FieldType(17, "Unit of Measure Literal", "char", 30));
+                        map_excel_master.put("R", new FieldType(18, "Case Pack Qty", "decimal", 0));
 
-                        map_excel_master.put("T", new FieldType(19, "Unit of Issue", "decimal", 0));
-                        map_excel_master.put("U", new FieldType(20, "Unit of Measure Code", "char", 3));
-                        map_excel_master.put("V", new FieldType(21, "Product Description", "char", 50));
+                        map_excel_master.put("S", new FieldType(19, "Unit of Issue", "decimal", 0));
+                        map_excel_master.put("T", new FieldType(20, "Unit of Measure Code", "char", 3));
+                        map_excel_master.put("U", new FieldType(21, "Product Description", "char", 50));
 
-                        map_excel_master.put("W", new FieldType(22, "Qty", "decimal", 0));
-                        map_excel_master.put("X", new FieldType(23, "Qty  Indicator", "char", 3));
-                        map_excel_master.put("Y", new FieldType(24, "Weight Shipped", "decimal", 0));
+                        map_excel_master.put("V", new FieldType(22, "Qty", "decimal", 0));
+                        map_excel_master.put("W", new FieldType(23, "Qty  Indicator", "char", 3));
+                        map_excel_master.put("X", new FieldType(24, "Weight Shipped", "decimal", 0));
 
-                        map_excel_master.put("Z", new FieldType(25, "Weight Shipped Indicator", "char", 3));
-                        map_excel_master.put("AA", new FieldType(26, "Total Sell Dollars", "decimal", 0));
-                        map_excel_master.put("AB", new FieldType(27, "Currency Code", "char", 15));
+                        map_excel_master.put("Y", new FieldType(25, "Weight Shipped Indicator", "char", 3));
+                        map_excel_master.put("Z", new FieldType(26, "Total Sell Dollars", "decimal", 0));
+                        map_excel_master.put("AA", new FieldType(27, "Currency Code", "char", 15));
 
-                        map_excel_master.put("AC", new FieldType(28, "Invoice Num", "char", 30));
+                        map_excel_master.put("AB", new FieldType(28, "Invoice Num", "char", 30));
 
-                        map_excel_master.put("AD", new FieldType(29, "Invoice Date", "date", 20));
-                        map_excel_master.put("AE", new FieldType(30, "PO Num", "char", 20));
-                        map_excel_master.put("AF", new FieldType(31, "PO Date", "date", 20));
+                        map_excel_master.put("AC", new FieldType(29, "Invoice Date", "date", 20));
+                        map_excel_master.put("AD", new FieldType(30, "PO Num", "char", 20));
+                        map_excel_master.put("AE", new FieldType(31, "PO Date", "date", 20));
 
                     }
                       return map_excel_master;
@@ -101,26 +101,26 @@ public class CommonObjects {
                         map_excel_option_master.put("O", new FieldType(14, "Man Product Num", "char", 40));
 
                         //map_excel_option_master.put("P1", new FieldType(16, "Brand Name", "char", 50));
-                        map_excel_option_master.put("Q1", new FieldType(15, "Unit of Measure Literal", "char", 30));
+                        map_excel_option_master.put("Q", new FieldType(15, "Unit of Measure Literal", "char", 30));
                         //map_excel_option_master.put("R1", new FieldType(18, "Case Pack Qty", "decimal", 0));
 
                         //map_excel_option_master.put("S1", new FieldType(19, "Unit of Issue", "decimal", 0));
                         //map_excel_option_master.put("T1", new FieldType(20, "Unit of Measure Code", "char", 3));
-                        map_excel_option_master.put("U1", new FieldType(16, "Product Description", "char", 50));
+                        map_excel_option_master.put("U", new FieldType(16, "Product Description", "char", 50));
 
-                        map_excel_option_master.put("V1", new FieldType(17, "Qty", "decimal", 0));
-                        map_excel_option_master.put("W1", new FieldType(18, "Qty  Indicator", "char", 3));
+                        map_excel_option_master.put("V", new FieldType(17, "Qty", "decimal", 0));
+                        map_excel_option_master.put("W", new FieldType(18, "Qty  Indicator", "char", 3));
                         //map_excel_option_master.put("X1", new FieldType(24, "Weight Shipped", "decimal", 0));
 
                         //map_excel_option_master.put("Y1", new FieldType(25, "Weight Shipped Indicator", "char", 3));
-                        map_excel_option_master.put("Z1", new FieldType(19, "Total Sell Dollars", "decimal", 0));
-                        map_excel_option_master.put("AA1", new FieldType(20, "Currency Code", "char", 15));
+                        map_excel_option_master.put("Z", new FieldType(19, "Total Sell Dollars", "decimal", 0));
+                        map_excel_option_master.put("AA", new FieldType(20, "Currency Code", "char", 15));
 
-                        map_excel_option_master.put("AB1", new FieldType(21, "Invoice Num", "char", 30));
+                        map_excel_option_master.put("AB", new FieldType(21, "Invoice Num", "char", 30));
 
-                        map_excel_option_master.put("AC1", new FieldType(22, "Invoice Date", "date", 20));
-                        map_excel_option_master.put("AD1", new FieldType(23, "PO Num", "char", 20));
-                        map_excel_option_master.put("AE1", new FieldType(24, "PO Date", "date", 20));
+                        map_excel_option_master.put("AC", new FieldType(22, "Invoice Date", "date", 20));
+                        map_excel_option_master.put("AD", new FieldType(23, "PO Num", "char", 20));
+                        map_excel_option_master.put("AE", new FieldType(24, "PO Date", "date", 20));
 
                     }
                         return map_excel_option_master;
@@ -256,7 +256,7 @@ public class CommonObjects {
                                 "DIST_CUST_CITY," +
                                 "DIST_CUST_STATE," +
                                 "DIST_CUST_ZIP_CD," +
-                                //  "CUST_ZIP_CD_PLUS," +
+                                "CUST_COUNTRY_CD," +
                                 "DIST_PROD_NUM," +
                                 "DIST_GTIN," +
                                 "MFR_NAME," +
@@ -282,7 +282,7 @@ public class CommonObjects {
                                 "MASTER_FILE_ID" +
 
                                 " ) "
-                                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                     return qry_excel_master;
                 }
                 else {
@@ -749,11 +749,7 @@ public class CommonObjects {
             dataTypes.put("char",Types.NVARCHAR);
             dataTypes.put("date",Types.NVARCHAR);
             return  dataTypes;
-
-
-
         }
-
             return  dataTypes;
     }
 }
