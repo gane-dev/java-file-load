@@ -32,12 +32,12 @@ public class ExcelTextFile {
     private File file;
     FileType fileType;
     InsertTableBase insertTable =null;
-
+    private String delimit="[|]";
     public ExcelTextFile(File p_file,FileType p_fileType) {
 
         file = p_file;
         fileType =p_fileType;
-        if (fileType == FileType.EXCEL || fileType == FileType.EXCEL_OPTION) {
+        if (fileType == FileType.EXCEL || fileType == FileType.EXCEL_OPTION || fileType == FileType.EXCEL_SHORT) {
             insertTable = new InsertTableBase(TableType.DIST_MASTER_STG1, file.getName(), fileType);
         }
         else {
@@ -50,19 +50,23 @@ public class ExcelTextFile {
             } else if (file.getName().toUpperCase().indexOf("_I") > 0) {
                 insertTable = new InsertTableBase(TableType.DIST_ITEM_STG1, file.getName(), fileType);
             }
+            if (fileType == FileType.TEXT_BANG_USAGE)
+                delimit = "[!]";
+            else if (fileType == FileType.TEXT_TAB_USAGE)
+                delimit = "[\t]";
         }
     }
 
     public int LoadFile() {
 
 
-        if (fileType == FileType.EXCEL || fileType == FileType.EXCEL_OPTION)
+        if (fileType == FileType.EXCEL || fileType == FileType.EXCEL_OPTION || fileType == FileType.EXCEL_SHORT)
             //return processExcelFile();
             return processExcelAsXml();
         //else if(fileType == FileType.EXCEL_OPTION)
           //  return processExcelAsXml();
         else
-            return processTextFile();
+            return processTextFiles();
     }
     private int processExcelAsXml()
     {
@@ -152,7 +156,7 @@ public class ExcelTextFile {
                 row.put(key, p_val);
                 key="";
               //  val="";
-                if (p_val.equals("ZZZZZ") || controlRecord) {
+                if (p_val.toUpperCase().equals("ZZZZZ") || controlRecord) {
                     controlRecord = true;
                     insertTable.AddControlRec(p_val);
                 }
@@ -223,14 +227,13 @@ public class ExcelTextFile {
     }
     public Map<String,String> AddTextCells(String rec) {
 
-        Map<String, String> textCells = null;
+        Map<String, String> textCells = new HashMap<String, String>();
         Scanner sc = new Scanner(rec);
-        sc.useDelimiter("[|]");
-        if (fileType == FileType.TEXT_BANG_USAGE)
-            sc.useDelimiter("[!]");
+        sc.useDelimiter(delimit);
         int idx = 1;
         while (sc.hasNext()) {
             textCells.put(String.valueOf(idx), sc.next());
+            idx++;
         }
         return textCells;
     }
@@ -248,7 +251,8 @@ public class ExcelTextFile {
             while (sc.hasNextLine()) {
                 str = sc.nextLine();
                 insertTable.AddRow(AddTextCells(str));
-                rowIndex++;
+                //rowIndex++;
+                insertTable.rowCount++;
             }
             masterResult = insertTable.InsertRecord(true,null, str,rowIndex+0.0);
             if (masterResult != 0)

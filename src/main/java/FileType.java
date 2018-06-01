@@ -23,6 +23,7 @@ public enum FileType {
 
       TEXT_OPTION_USAGE,
       TEXT_OPTION_CUSTOMER,
-      TEXT_OPTION_ITEM
+      TEXT_OPTION_ITEM,
+      EXCEL_SHORT
 
 }

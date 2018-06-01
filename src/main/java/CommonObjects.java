@@ -11,6 +11,7 @@ public class CommonObjects {
     static  String connectionString="";
     static String qry_excel_master="";
     static String qry_excel_option_master="";
+    static String qry_excel_short_master="";
     static String qry_item="";
     static String qry_usage="";
     static String qry_cust="";
@@ -19,6 +20,7 @@ public class CommonObjects {
     static String qry_track="";
     static Map<String,FieldType> map_excel_master = null;
     static Map<String,FieldType> map_excel_option_master = null;
+    static Map<String,FieldType> map_excel_short_master = null;
     static Map<String,FieldType> map_item = null;
     static Map<String,FieldType> map_cust = null;
     static Map<String,FieldType> map_usage = null;
@@ -77,7 +79,7 @@ public class CommonObjects {
                     }
                       return map_excel_master;
 
-                } else {
+                } else if (fileType == FileType.EXCEL_OPTION){
                     if (map_excel_option_master == null) {
                         map_excel_option_master =  new HashMap<String, FieldType>();
                         map_excel_option_master.put("A", new FieldType(1, "Begin Usage Date", "date", 20));
@@ -125,6 +127,50 @@ public class CommonObjects {
                     }
                         return map_excel_option_master;
                 }
+                else if (fileType == FileType.EXCEL_SHORT) {
+                    if (map_excel_short_master == null) {
+                        map_excel_short_master =  new HashMap<String, FieldType>();
+
+                        map_excel_short_master.put("A", new FieldType(1, "Begin Usage Date", "date", 20));
+                        map_excel_short_master.put("B", new FieldType(2, "End Usage Date", "date", 20));
+                        map_excel_short_master.put("C", new FieldType(3, "Distributor Warehouse ID", "char", 7));
+
+                        map_excel_short_master.put("D", new FieldType(4, "Customer Number", "char", 40));
+                        map_excel_short_master.put("E", new FieldType(5, "Name", "char", 50));
+
+                        map_excel_short_master.put("F", new FieldType(6, "City", "char", 25));
+                        map_excel_short_master.put("G", new FieldType(7, "State", "char", 2));
+
+
+                        map_excel_short_master.put("H", new FieldType(8, "CUST_COUNTRY_CD", "char", 3));
+                        map_excel_short_master.put("I", new FieldType(9, "Distributor Product Number", "char", 40));
+
+
+                        map_excel_short_master.put("J", new FieldType(10, "Manufacturer Name", "char", 50));
+                        map_excel_short_master.put("K", new FieldType(11, "Man Product Num", "char", 40));
+
+                        map_excel_short_master.put("L", new FieldType(12, "Brand Name", "char", 50));
+                        map_excel_short_master.put("M", new FieldType(13, "Unit of Measure Literal", "char", 30));
+
+
+
+                        map_excel_short_master.put("N", new FieldType(14, "Unit of Measure Code", "char", 3));
+                        map_excel_short_master.put("O", new FieldType(15, "Product Description", "char", 50));
+
+                        map_excel_short_master.put("P", new FieldType(16, "Qty", "decimal", 0));
+                        map_excel_short_master.put("Q", new FieldType(17, "Qty  Indicator", "char", 3));
+                        map_excel_short_master.put("R", new FieldType(18, "Weight Shipped", "decimal", 0));
+
+                        map_excel_short_master.put("S", new FieldType(19, "Weight Shipped Indicator", "char", 3));
+                        map_excel_short_master.put("T", new FieldType(20, "Total Sell Dollars", "decimal", 0));
+                        map_excel_short_master.put("U", new FieldType(21, "Currency Code", "char", 15));
+
+
+
+                    }
+                    return map_excel_short_master;
+
+                }
             }
             case DIST_ITEM_STG1: {
                 if (map_item == null) {
@@ -133,20 +179,20 @@ public class CommonObjects {
                     map_item.put("2", new FieldType(2, "End Usage Date", "char", 20));
                     map_item.put("3", new FieldType(3, "Distributor Warehouse ID", "char", 7));
 
-                    map_item.put("4", new FieldType(4, "Customer Number", "char", 40));
-                    map_item.put("5", new FieldType(5, "Name", "char", 50));
-                    map_item.put("6", new FieldType(6, "Address", "char", 50));
+                    map_item.put("4", new FieldType(4, "DIST_PROD_NUM", "char", 40));
+                    map_item.put("5", new FieldType(5, "MFR_NAME", "char", 50));
+                    map_item.put("6", new FieldType(6, "MFR_PROD_NUM", "char", 50));
 
-                    map_item.put("7", new FieldType(7, "Address2", "char", 50));
-                    map_item.put("8", new FieldType(8, "City", "char", 25));
-                    map_item.put("9", new FieldType(9, "State", "char", 30));
+                    map_item.put("7", new FieldType(7, "BRAND_NAME", "char", 50));
+                    map_item.put("8", new FieldType(8, "DIST_GTIN_UPC", "char", 25));
+                    map_item.put("9", new FieldType(9, "CASE_PACK_LITERAL", "char", 30));
 
-                    map_item.put("10", new FieldType(10, "Zip", "decimal", 0));
-                    map_item.put("11", new FieldType(11, "Country Code", "decimal", 0));
-                    map_item.put("12", new FieldType(12, "Distributor Product Number", "char", 3));
+                    map_item.put("10", new FieldType(10, "CASE_PACK_QTY", "decimal", 0));
+                    map_item.put("11", new FieldType(11, "UNIT_OF_ISSUE", "decimal", 0));
+                    map_item.put("12", new FieldType(12, "UNIT_OF_MEASURE_DESC", "char", 3));
 
-                    map_item.put("13", new FieldType(13, "GTIN/UPC", "char", 50));
-                    map_item.put("14", new FieldType(14, "Manufacturer Name", "char", 15));
+                    map_item.put("13", new FieldType(13, "DIST_PROD_DESC", "char", 50));
+                    map_item.put("14", new FieldType(14, "DIST_ALT_ITEM_ID", "char", 15));
 
                 }
                 return map_item;
@@ -187,22 +233,25 @@ public class CommonObjects {
                         map_usage.put("3", new FieldType(3, "Distributor Warehouse ID", "char", 7));
 
                         map_usage.put("4", new FieldType(4, "Customer Number", "char", 40));
-                        map_usage.put("5", new FieldType(5, "Name", "char", 40));
-                        map_usage.put("6", new FieldType(6, "Address", "char", 14));
+                        map_usage.put("5", new FieldType(5, "DIST_PROD_NUM", "char", 40));
+                        map_usage.put("6", new FieldType(6, "DIST_GTIN", "char", 14));
 
-                        map_usage.put("7", new FieldType(7, "Address2", "decimal", 0));
-                        map_usage.put("8", new FieldType(8, "City", "char", 3));
-                        map_usage.put("9", new FieldType(9, "State", "decimal", 0));
+                        map_usage.put("7", new FieldType(7, "TOTAL_USAGE_IN_UNITS", "decimal", 0));
+                        map_usage.put("8", new FieldType(8, "DIST_SIZE_INDICATOR", "char", 3));
+                        map_usage.put("9", new FieldType(9, "WEIGHT_SHIPPED", "decimal", 0));
 
-                        map_usage.put("10", new FieldType(10, "Zip", "char", 3));
-                        map_usage.put("11", new FieldType(11, "Country Code", "decimal", 0));
-                        map_usage.put("12", new FieldType(12, "Distributor Product Number", "char", 15));
+                        map_usage.put("10", new FieldType(10, "WEIGHT_SHIPPED_INDICATOR", "char", 3));
+                        map_usage.put("11", new FieldType(11, "DIST_WEIGHT_SHIPPED_INDICATOR", "char", 3));
 
-                        map_usage.put("13", new FieldType(13, "GTIN/UPC", "char", 30));
-                        map_usage.put("14", new FieldType(14, "Manufacturer Name", "char", 20));
-                        map_usage.put("15", new FieldType(15, "Man Product Num", "char", 20));
+                        map_usage.put("12", new FieldType(12, "TOTAL_DIST_SELL_DOLLARS", "decimal", 0));
+                        map_usage.put("13", new FieldType(13, "CURRENCY_TYPE", "char", 15));
 
-                        map_usage.put("16", new FieldType(16, "Brand Name", "char", 20));
+                        map_usage.put("14", new FieldType(14, "DIST_INVOICE_ID", "char", 30));
+                        map_usage.put("15", new FieldType(15, "DIST_INVOICE_DT", "char", 20));
+                        map_usage.put("16", new FieldType(16, "DIST_PO_ID", "char", 20));
+
+                        map_usage.put("17", new FieldType(17, "DIST_PO_DT", "char", 20));
+
 
                     }
                         return map_usage;
@@ -214,23 +263,24 @@ public class CommonObjects {
                         map_option_usage.put("3", new FieldType(3, "Distributor Warehouse ID", "char", 7));
 
                         map_option_usage.put("4", new FieldType(4, "Customer Number", "char", 40));
-                        map_option_usage.put("5", new FieldType(5, "Name", "char", 40));
-                        //map_option_usage.put("6", new FieldType(6, "Address", "char", 14));
+                        map_option_usage.put("5", new FieldType(5, "DIST_PROD_NUM", "char", 40));
+                        map_option_usage.put("6", new FieldType(6, "DIST_GTIN", "char", 14));
 
-                        map_option_usage.put("7", new FieldType(6, "Address2", "decimal", 0));
-                        map_option_usage.put("8", new FieldType(7, "City", "char", 3));
-                        //map_option_usage.put("9", new FieldType(9, "State", "decimal", 0));
+                        map_option_usage.put("7", new FieldType(7, "TOTAL_USAGE_IN_UNITS", "decimal", 0));
+                        map_option_usage.put("8", new FieldType(8, "DIST_SIZE_INDICATOR", "char", 3));
+                        map_option_usage.put("9", new FieldType(9, "WEIGHT_SHIPPED", "decimal", 0));
 
-                        //map_option_usage.put("10", new FieldType(10, "Zip", "char", 3));
-                        map_option_usage.put("11", new FieldType(8, "Country Code", "decimal", 0));
-                        map_option_usage.put("12", new FieldType(9, "Distributor Product Number", "char", 15));
+                        map_option_usage.put("10", new FieldType(10, "WEIGHT_SHIPPED_INDICATOR", "char", 3));
+                        map_option_usage.put("11", new FieldType(11, "DIST_WEIGHT_SHIPPED_INDICATOR", "char", 3));
 
-                        map_option_usage.put("13", new FieldType(10, "GTIN/UPC", "char", 30));
-                        map_option_usage.put("14", new FieldType(11, "Manufacturer Name", "char", 20));
-                        map_option_usage.put("15", new FieldType(12, "Man Product Num", "char", 20));
+                        map_option_usage.put("12", new FieldType(12, "TOTAL_DIST_SELL_DOLLARS", "decimal", 0));
+                        map_option_usage.put("13", new FieldType(13, "CURRENCY_TYPE", "char", 15));
 
-                        map_option_usage.put("16", new FieldType(13, "Brand Name", "char", 20));
-
+//                        map_usage.put("13", new FieldType(14, "DIST_INVOICE_ID", "char", 30));
+//                        map_usage.put("14", new FieldType(15, "DIST_INVOICE_DT", "char", 20));
+//                        map_usage.put("15", new FieldType(16, "DIST_PO_ID", "char", 20));
+//
+//                        map_usage.put("16", new FieldType(17, "DIST_PO_DT", "char", 20));
                     }
                         return map_option_usage;
                 }
@@ -285,7 +335,7 @@ public class CommonObjects {
                                 + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                     return qry_excel_master;
                 }
-                else {
+                else  if ( fileType == FileType.EXCEL_OPTION){
                     if (qry_excel_option_master.equals(""))
                         qry_excel_option_master = "INSERT INTO DIST_MASTER_STG1 " +
                                 "( BEGIN_USAGE_DATE," +
@@ -327,6 +377,48 @@ public class CommonObjects {
                                 + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
                     return qry_excel_option_master;
+                }
+                else if ( fileType == FileType.EXCEL_SHORT) {
+                    if (qry_excel_short_master.equals(""))
+                        qry_excel_short_master = "INSERT INTO DIST_MASTER_STG1 " +
+                                "( BEGIN_USAGE_DATE," +
+                                "END_USAGE_DATE," +
+                                "DIST_ID," +
+                                "DIST_CUST_NUM," +
+                                "DIST_CUST_NAME," +
+                                //"DIST_CUST_ADDRESS," +
+                                //"DIST_CUST_ADDRESS2," +
+                                "DIST_CUST_CITY," +
+                                "DIST_CUST_STATE," +
+                                //"DIST_CUST_ZIP_CD," +
+                                "CUST_COUNTRY_CD," +
+                                "DIST_PROD_NUM," +
+                                //"DIST_GTIN," +
+                                "MFR_NAME," +
+                                "MFR_PROD_NUM," +
+                                "BRAND_NAME," +
+                                "CASE_PACK_LITERAL," +
+                                //"CASE_PACK_QTY," +
+                                //"UNIT_OF_ISSUE," +
+                                "UNIT_OF_MEASURE_DESC," +
+                                "DIST_PROD_DESC," +
+                                "TOTAL_USAGE_IN_UNITS," +
+                                "DIST_SIZE_INDICATOR," +
+                                "WEIGHT_SHIPPED," +
+                                "DIST_WEIGHT_SHIPPED_INDICATOR," +
+                                "TOTAL_DIST_SELL_DOLLARS," +
+                                "CURRENCY_TYPE," +
+                                //"DIST_INVOICE_ID," +
+                                //"DIST_INVOICE_DT," +
+                                //"DIST_PO_ID," +
+                                //"DIST_PO_DT," +
+
+                                "STATUS, " +
+                                "MASTER_FILE_ID" +
+
+                                " ) "
+                                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    return qry_excel_short_master;
                 }
             }
 

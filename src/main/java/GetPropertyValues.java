@@ -10,10 +10,10 @@ public class GetPropertyValues {
     InputStream inputStream;
     final static Logger logger = Logger.getLogger(GetPropertyValues.class);
     Properties prop;
-    public GetPropertyValues()  {
+    public GetPropertyValues(String fileName)  {
         try {
             prop = new Properties();
-            String propFileName = "config.properties";
+            String propFileName = fileName;//"config.properties";
 
             inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 

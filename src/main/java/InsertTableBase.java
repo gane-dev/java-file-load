@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 
 //import java.lang.reflect.Field;
+import java.io.File;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -52,7 +53,7 @@ public  class InsertTableBase implements  InsertTable{
                     conn.commit();
                     if (finalCommit) {
                         AddLoaderLog(rowCount-1.0);
-                        AddControlLog();
+                        if (tableType == TableType.DIST_MASTER_STG1 || tableType == TableType.DIST_USAGE_STG1 ){ AddControlLog();};
                         if (tableType != TableType.DIST_MASTER_STG1)
                             AddSrcTrack();
                         conn.commit();
@@ -123,7 +124,7 @@ public  class InsertTableBase implements  InsertTable{
             FieldType field = null;
             if (fieldLength.containsKey(key)) {
                 field = fieldLength.get(key);
-
+                val = val.trim();
                 if (!val.isEmpty()) {
                     switch (field.getDataType()) {
                         case "char": {
@@ -169,7 +170,7 @@ public  class InsertTableBase implements  InsertTable{
 
         boolean cntrlLog = false;
         try {
-            if (rowCount != 0) {
+            if (rowCount != 0 || tableType != TableType.DIST_MASTER_STG1) {
             if (insertStatement == null) {
                 insertStatement = conn.prepareStatement(insertSQL);
 
@@ -177,16 +178,26 @@ public  class InsertTableBase implements  InsertTable{
             AddDefaultValues();
             for (String k : rec.keySet()) {
 
-                if (!rec.get(k).equals("ZZZZZ"))
-                    AddCell(k, rec.get(k));
-                else {
-                  //  AddControlLog(controlRecord);
-                    cntrlLog = true;
-                    break;
+                if ((k.equals("1") || k.toUpperCase().equals("A")))
+                {
+                    if ((rec.get(k).toUpperCase().equals("ZZZZZ") )) {
+                        controlRecord = rec;
+                        cntrlLog = true;
+                        return 0;
+                    }
+                    else
+                    {
+                        if (rec.get(k).toUpperCase().indexOf("B") > -1  ) {
+                            rowCount--;
+                            return 0;
+                        }
+                    }
+
                 }
+                AddCell(k, rec.get(k));
             }
-            if (!cntrlLog)
-                AddStdFields();
+           // if (!cntrlLog)
+            AddStdFields();
             insertStatement.addBatch();
         }
             return 0;
@@ -212,30 +223,42 @@ public  class InsertTableBase implements  InsertTable{
           switch (tableType) {
 
               case DIST_MASTER_STG1: {
-                  idx  =32;
+                  if (fileType == FileType.EXCEL_SHORT)
+                    idx  =22;
+                  else idx  =32;
                   insertStatement.setString(idx, "N");
                   idx++;
                   insertStatement.setString(idx, "M" + fileId);
                   break;
               }
               case DIST_USAGE_STG1: {
-                  idx = 16;
-              }
-              case DIST_CUST_STG1:{
-                  idx=11;
-              }
-              case DIST_ITEM_STG1:{
-                  idx=14;
-              }
-              default:
-              {
-
+                  idx = 18;
                   insertStatement.setInt(idx, fileId);
                   idx++;
                   insertStatement.setString(idx, "N");
                   idx++;
                   insertStatement.setString(idx, "M" + fileId);
+                  break;
               }
+              case DIST_CUST_STG1:{
+                  idx=12;
+                  insertStatement.setInt(idx, fileId);
+                  idx++;
+                  insertStatement.setString(idx, "N");
+                  idx++;
+                  insertStatement.setString(idx, "M" + fileId);
+                  break;
+              }
+              case DIST_ITEM_STG1:{
+                  idx=15;
+                  insertStatement.setInt(idx, fileId);
+                  idx++;
+                  insertStatement.setString(idx, "N");
+                  idx++;
+                  insertStatement.setString(idx, "M" + fileId);
+                  break;
+              }
+
           }
           }
       catch (SQLException sqx)
@@ -293,15 +316,16 @@ public  class InsertTableBase implements  InsertTable{
         return  -1.0;
     }
     private int AddControlLog(){
-        Double usageCount =0.0;
-        Double spendCount=0.0;
-        Double totalCount=0.0;
+        Double usageCount =-1.0;
+        Double spendCount=-1.0;
+        Double totalCount=-1.0;
         try{
         Object[] logArray =  controlRecord.values().toArray();
-
-        totalCount = ProcessTotals(logArray[1]);
-        usageCount = ProcessTotals(logArray[2]);
-        spendCount = ProcessTotals(logArray[3]);
+        if (logArray.length >= 4) {
+            totalCount = ProcessTotals(logArray[1]);
+            usageCount = ProcessTotals(logArray[2]);
+            spendCount = ProcessTotals(logArray[3]);
+        }
         if (totalCount != -1.0 && usageCount != -1.0 && spendCount != -1.0 )
             return InsertControlTotal(totalCount, usageCount, spendCount);
         else

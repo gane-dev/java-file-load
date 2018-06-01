@@ -39,7 +39,7 @@ public class FileManagement {
          Files.newDirectoryStream(Paths.get(filePath),"*.*")
             //    path -> path.toString().endsWith(".xlsx")  )
                     .forEach(filePath -> {
-                        try {
+                                try {
                             LoadFile(filePath.toFile());
                         }
                         catch(IOException ix)
@@ -66,7 +66,7 @@ public class FileManagement {
 
         String archiveFileName;
         try{
-            if (fileType == FileType.EXCEL || fileType == FileType.EXCEL_OPTION)
+            if (fileType == FileType.EXCEL || fileType == FileType.EXCEL_OPTION|| fileType == FileType.EXCEL_SHORT)
                 archiveFileName = fileName.substring(0, fileName.lastIndexOf(".")) + sdf.format(date) + ".xlsx";
             else
                 archiveFileName= fileName.substring(0,fileName.lastIndexOf("."))+ sdf.format(date) +".txt";
