@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
 public class ReadDB {
-    final static Logger logger = Logger.getLogger(JdbcOracleConnection.class);
+    final static Logger logger = Logger.getLogger(ReadDB.class);
 
     public static int getFileId(Connection p_conn)
     {

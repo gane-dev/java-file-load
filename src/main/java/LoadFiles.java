@@ -49,7 +49,9 @@ public class LoadFiles {
                 System.exit(0);
             }
         if (args[0].toUpperCase().equals("COPY")) {
-
+            FileCopy fileCopy = new FileCopy();
+            fileCopy.CopyFiles(args[1],args[2]);
+            logger.info("File Copy completed");
         } else {
             switch (args[0]) {
                 case "0": {
