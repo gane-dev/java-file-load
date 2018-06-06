@@ -52,7 +52,16 @@ public class LoadFiles {
             FileCopy fileCopy = new FileCopy();
             fileCopy.CopyFiles(args[1],args[2]);
             logger.info("File Copy completed");
-        } else {
+        }
+        else if (args[0].toUpperCase().equals("RUNTIME")){
+                JobRuntime jobRuntime = new JobRuntime();
+                jobRuntime.GetJobRuntimes(args[1],args[2]);
+        }
+        else if (args[0].toUpperCase().equals("JOBS")){
+            RunJobs jobs = new RunJobs();
+            jobs.RunUC4Jobs();
+        }
+        else {
             switch (args[0]) {
                 case "0": {
                     fileType = FileType.EXCEL;

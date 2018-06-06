@@ -55,7 +55,7 @@ Connection conn;
         startDateTime = p_startDateTime;
         endDateTime = p_endDateTime;
         try {
-           // GetFiles(true);
+            GetFiles(true);
             GetFiles(false);
 
             return 0;
@@ -130,15 +130,14 @@ Connection conn;
         }
         return 0;
     }
-    private Optional<String> GetCopyPath(String filePath)
-    {
-        Optional<String> copyPath= null;
+    private Optional<String> GetCopyPath(String filePath) {
+        Optional<String> copyPath = null;
         if (filePath.toUpperCase().contains("SHORT"))
             copyPath = Optional.of(excel_short_file_path);
         if (filePath.toUpperCase().contains("EXCEL"))
             copyPath = Optional.of(excel_file_path);
         else if (filePath.toUpperCase().contains("GTIN"))
-            copyPath= Optional.of(default_file_path);
+            copyPath = Optional.of(default_file_path);
         else if (filePath.toUpperCase().contains("PIPE"))
             copyPath = Optional.of(text_pipe_file_path);
         else if (filePath.toUpperCase().contains("BANG"))
@@ -150,10 +149,14 @@ Connection conn;
         else if (filePath.toUpperCase().contains("TAB"))
             copyPath = Optional.of(text_tab_file_path);
         else
-            copyPath= Optional.of(default_file_path);
+            copyPath = Optional.of(default_file_path);
 
-        return  copyPath;
+        File directory = new File(copyPath.get());
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+            return copyPath;
+
     }
-
 
 }
