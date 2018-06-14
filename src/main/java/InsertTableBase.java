@@ -169,6 +169,7 @@ public  class InsertTableBase implements  InsertTable{
     {
 
         boolean cntrlLog = false;
+        int result =0;
         try {
             if (rowCount != 0 || tableType != TableType.DIST_MASTER_STG1) {
             if (insertStatement == null) {
@@ -187,14 +188,16 @@ public  class InsertTableBase implements  InsertTable{
                     }
                     else
                     {
-                        if (rec.get(k).toUpperCase().indexOf("B") > -1  ) {
+                        if (rec.get(k).toUpperCase().matches(".*[A-Z].*" )){
                             rowCount--;
                             return 0;
                         }
                     }
 
                 }
-                AddCell(k, rec.get(k));
+             result=   AddCell(k, rec.get(k));
+                if (result == -1)
+                    return -1;
             }
            // if (!cntrlLog)
             AddStdFields();
@@ -232,7 +235,7 @@ public  class InsertTableBase implements  InsertTable{
                   break;
               }
               case DIST_USAGE_STG1: {
-                  idx = 18;
+                  idx = 17;
                   insertStatement.setInt(idx, fileId);
                   idx++;
                   insertStatement.setString(idx, "N");

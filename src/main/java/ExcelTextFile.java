@@ -149,36 +149,42 @@ public class ExcelTextFile {
         private boolean controlRecord =false;
         private  int rowNum=1;
         private int cellNum=1;
-        private void AddCellToRow(String p_key, String p_val)
-        {
+        private int AddCellToRow(String p_key, String p_val) {
+            int result = 0;
+            try {
 
-            if (!p_val.equals("")) {
-                row.put(key, p_val);
-                key="";
-              //  val="";
-                if (p_val.toUpperCase().equals("ZZZZZ") || controlRecord) {
-                    controlRecord = true;
-                    insertTable.AddControlRec(p_val);
+
+                if (!p_val.equals("")) {
+                    row.put(key, p_val);
+                    key = "";
+                    //  val="";
+                    if (p_val.toUpperCase().equals("ZZZZZ") || controlRecord) {
+                        controlRecord = true;
+                        insertTable.AddControlRec(p_val);
+                    }
+
+                } else {
+                    //key =p_key;
+                    int rwNum = new Scanner(p_key).useDelimiter("\\D+").nextInt();
+                    key = p_key.substring(0, p_key.indexOf(String.valueOf(rwNum)));
+                    //  if (!(key.substring(1).equals(String.valueOf(rowNum))))
+                    if ((!(rwNum == rowNum)) && !controlRecord)
+
+                    {
+                        //next row
+                        rowNum++;
+                        result = insertTable.AddRow(row);
+                        if (result == -1)
+                            return -1;
+                        insertTable.rowCount++;
+                        row = new HashMap<String, String>();
+                    }
                 }
 
+            } catch (Exception ex) {
+                return  -1;
             }
-            else{
-                //key =p_key;
-                int rwNum = new Scanner(p_key).useDelimiter("\\D+").nextInt();
-                key = p_key.substring(0,p_key.indexOf(String.valueOf(rwNum)));
-              //  if (!(key.substring(1).equals(String.valueOf(rowNum))))
-                if ((!(rwNum == rowNum) ) && !controlRecord)
-
-                {
-                 //next row
-                rowNum++;
-                 insertTable.AddRow(row);
-                 insertTable.rowCount++;
-                 row = new HashMap<String,String>();
-                }
-            }
-
-
+            return  0;
         }
 
         public void startElement(String uri, String localName, String name,

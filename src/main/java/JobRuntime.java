@@ -100,7 +100,7 @@ public class JobRuntime {
         Statement stmt = null;
         String sql ="";
         ResultSet rs;
-        String runtime="";
+        String runtime=null;
         try {
             if (query.isPresent())
                 sql = String.format(query.get(),startDateTime,endDateTime);
@@ -108,7 +108,7 @@ public class JobRuntime {
                 if (key.equals("Validation"))
                     sql = String.format(runtimeQuery, startDateTime, endDateTime, jobMap.get(key),100);
                 else
-                    sql = String.format(runtimeQuery, startDateTime, endDateTime, jobMap.get(key),2);
+                    sql = String.format(runtimeQuery, startDateTime, endDateTime, jobMap.get(key),100);
             }
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
@@ -116,10 +116,11 @@ public class JobRuntime {
                 runtime=  rs.getString(1);
 
             }
-            if (runtime.equals(""))
-               return Optional.empty();
-                else
-                     return  Optional.of(runtime);
+            return Optional.ofNullable(runtime).filter(s -> !s.isEmpty());
+//            if (runtime.equals(""))
+//               return Optional.empty();
+//                else
+//                     return  Optional.of(runtime);
         }
         catch (SQLException sx)
         {

@@ -240,17 +240,16 @@ public class CommonObjects {
                         map_usage.put("8", new FieldType(8, "DIST_SIZE_INDICATOR", "char", 3));
                         map_usage.put("9", new FieldType(9, "WEIGHT_SHIPPED", "decimal", 0));
 
-                        map_usage.put("10", new FieldType(10, "WEIGHT_SHIPPED_INDICATOR", "char", 3));
-                        map_usage.put("11", new FieldType(11, "DIST_WEIGHT_SHIPPED_INDICATOR", "char", 3));
+                        //map_usage.put("10", new FieldType(10, "WEIGHT_SHIPPED_INDICATOR", "char", 3));
+                        map_usage.put("10", new FieldType(10, "DIST_WEIGHT_SHIPPED_INDICATOR", "char", 3));
 
-                        map_usage.put("12", new FieldType(12, "TOTAL_DIST_SELL_DOLLARS", "decimal", 0));
-                        map_usage.put("13", new FieldType(13, "CURRENCY_TYPE", "char", 15));
+                        map_usage.put("11", new FieldType(11, "TOTAL_DIST_SELL_DOLLARS", "decimal", 0));
+                        map_usage.put("12", new FieldType(12, "CURRENCY_TYPE", "char", 15));
 
-                        map_usage.put("14", new FieldType(14, "DIST_INVOICE_ID", "char", 30));
-                        map_usage.put("15", new FieldType(15, "DIST_INVOICE_DT", "char", 20));
-                        map_usage.put("16", new FieldType(16, "DIST_PO_ID", "char", 20));
-
-                        map_usage.put("17", new FieldType(17, "DIST_PO_DT", "char", 20));
+                        map_usage.put("13", new FieldType(13, "DIST_INVOICE_ID", "char", 30));
+                        map_usage.put("14", new FieldType(14, "DIST_INVOICE_DT", "char", 20));
+                        map_usage.put("15", new FieldType(15, "DIST_PO_ID", "char", 20));
+                        map_usage.put("16", new FieldType(16, "DIST_PO_DT", "char", 20));
 
 
                     }
@@ -488,7 +487,7 @@ public class CommonObjects {
                                 "DIST_SIZE_INDICATOR," +
 
                                 "WEIGHT_SHIPPED," +
-                                "WEIGHT_SHIPPED_INDICATOR, " +
+                                //"WEIGHT_SHIPPED_INDICATOR, " +
                                 "DIST_WEIGHT_SHIPPED_INDICATOR, " +
                                 "TOTAL_DIST_SELL_DOLLARS," +
                                 "CURRENCY_TYPE," +
@@ -500,7 +499,7 @@ public class CommonObjects {
                                 "STATUS, " +
                                 "MASTER_FILE_ID" +
                                 " ) "
-                                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                     return qry_usage;
                 }
                 else if (fileType == FileType.TEXT_OPTION_USAGE)
